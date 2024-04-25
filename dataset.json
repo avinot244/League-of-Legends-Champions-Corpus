@@ -1,29 +1,4 @@
 {
     "data": [
-        {
-            "text": "this is a text",
-            "championName": "champion",
-            "role": "role"
-        },
-        {
-            "text": "this is a text",
-            "championName": "champion",
-            "role": "role"
-        },
-        {
-            "text": "this is a text",
-            "championName": "champion",
-            "role": "role"
-        },
-        {
-            "text": "this is a text",
-            "championName": "champion",
-            "role": "role"
-        },
-        {
-            "text": "this is a text",
-            "championName": "champion",
-            "role": "role"
-        }
     ]
 }
