@@ -11,3 +11,6 @@ def saveToJson(data : DataEntry, json_path : str):
 
     with open(json_path, 'w') as file:
         json.dump(data, file, indent=4)
+
+
+
