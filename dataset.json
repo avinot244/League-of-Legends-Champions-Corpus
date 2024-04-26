@@ -7,9 +7,20 @@
                 "dtype": "string",
                 "_type": "Value"
             }
+        },
+        {
+            "feature_idx": 1,
+            "name": "label",
+            "type": {
+                "names": [
+                    "neg",
+                    "pos"
+                ],
+                "_type": "ClassLabel"
+            }
         }
     ],
-    "row": [
+    "rows": [
         {
             "row_idx": 0,
             "row": {
