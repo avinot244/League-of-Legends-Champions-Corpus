@@ -1,13 +1,11 @@
-from packages.model import DataEntry
 
 import json
 
-def saveToJson(data : DataEntry, json_path : str):
-    data_dict : dict = data.__dict__
+def saveToJson(data_dict : dict, json_path : str):
     with open(json_path, 'r') as file:
         data = json.load(file)
 
-    data['data'].append(data_dict)
+    data['row'].append(data_dict)
 
     with open(json_path, 'w') as file:
         json.dump(data, file, indent=4)
