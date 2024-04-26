@@ -17,6 +17,8 @@ if __name__ == "__main__":
     champion_names = [s.lower() for s in champion_names]
 
     row_idx : int = 0
+
+    lines : list = []
     for champion_name in tqdm(champion_names):
         snw : dict = get_champion_SnW(champion_name)
         snwDataList : list = snw["data"]["guidesByRoleData"]
@@ -27,31 +29,34 @@ if __name__ == "__main__":
         
         for pwData, snwData in zip(powerSpikesDataList, snwDataList):
             # For Strenght and weaknesses
-            rowContentS : RowContent = RowContent(snwData["flatData"]["strengths"], -1)
-            rowS : Row = Row(row_idx, rowContentS)
-            row_idx += 1
-            saveToJson(rowS.asDict(), "./dataset.json")
+            dataSW1 : dict = {
+                "text": snwData["flatData"]["strengths"],
+                
+            }
 
-            rowContentW : RowContent = RowContent(snwData["flatData"]["weaknesses"], -1)
-            rowW : Row = Row(row_idx, rowContentW)
-            row_idx += 1
-            saveToJson(rowW.asDict(), "./dataset.json")
+            dataSW2 : dict = {
+                "text": snwData["flatData"]["weaknesses"]
+            }
             
+            lines.append(dataSW1)
+            lines.append(dataSW2)
             
             # For Power spikes
             pwGameStages = pwData["flatData"]["gameStages"]
             for pwGS in pwGameStages:
-                
-                rowContentGamePlan : RowContent = RowContent(pwGS["gamePlan"], -1)
-                rowGamePlan : Row = Row(row_idx, rowContentGamePlan)
-                row_idx += 1
-                saveToJson(rowGamePlan.asDict(), "./dataset.json")
+                dataPS1 : dict = {
+                    "text": pwGS["gamePlan"]
+                }
+                dataPS2 : dict = {
+                    "text": pwGS["powerSpikeDescription"]
+                }
 
-                rowContentDescription : RowContent = RowContent(pwGS["powerSpikeDescription"], -1)
-                rowDescription : Row = Row(row_idx, rowContentDescription)
-                row_idx += 1           
-                saveToJson(rowDescription.asDict(), "./dataset.json")
-            
+                lines.append(dataPS1)
+                lines.append(dataPS2)
+
+    with open("dataset.jsonl", "w") as f:
+        for line in lines:
+            f.write(json.dumps(line) + "\n")
 
 
             
