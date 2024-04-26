@@ -1,10 +1,11 @@
 from packages.model import *
-from packages.utils import saveToJson
+from packages.utils import replace_within_double_curly_brackets
 from packages.api_calls import get_champion_SnW, get_champion_powerSpikes
 
 
 import json
 from tqdm import tqdm
+import numpy as np
 
 if __name__ == "__main__":
 
@@ -29,13 +30,14 @@ if __name__ == "__main__":
         
         for pwData, snwData in zip(powerSpikesDataList, snwDataList):
             # For Strenght and weaknesses
+                
             dataSW1 : dict = {
-                "text": snwData["flatData"]["strengths"],
+                "text": replace_within_double_curly_brackets(snwData["flatData"]["strengths"]),
                 
             }
 
             dataSW2 : dict = {
-                "text": snwData["flatData"]["weaknesses"]
+                "text": replace_within_double_curly_brackets(snwData["flatData"]["weaknesses"])
             }
             
             lines.append(dataSW1)
@@ -45,17 +47,28 @@ if __name__ == "__main__":
             pwGameStages = pwData["flatData"]["gameStages"]
             for pwGS in pwGameStages:
                 dataPS1 : dict = {
-                    "text": pwGS["gamePlan"]
+                    "text": replace_within_double_curly_brackets(pwGS["gamePlan"])
                 }
                 dataPS2 : dict = {
-                    "text": pwGS["powerSpikeDescription"]
+                    "text": replace_within_double_curly_brackets(pwGS["powerSpikeDescription"])
                 }
 
                 lines.append(dataPS1)
                 lines.append(dataPS2)
 
-    with open("dataset.jsonl", "w") as f:
-        for line in lines:
+    db_size = len(lines)
+    train_size = round(db_size * 0.80)
+
+    np.random.shuffle(lines)
+    train_data = lines[:train_size]
+    test_data = lines[train_size + 1:]
+
+    with open("train-lol-champs.jsonl", "w") as f:
+        for line in train_data:
+            f.write(json.dumps(line) + "\n")
+
+    with open("test-lol-champs.jsonl", "w") as f:
+        for line in test_data:
             f.write(json.dumps(line) + "\n")
 
 
