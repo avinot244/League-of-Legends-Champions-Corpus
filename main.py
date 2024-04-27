@@ -1,6 +1,6 @@
 from packages.model import *
 from packages.utils import replace_within_double_curly_brackets
-from packages.api_calls import get_champion_SnW, get_champion_powerSpikes
+from packages.api_calls import get_champion_SnW, get_champion_powerSpikes, get_champion_counters
 
 
 import json
@@ -27,10 +27,28 @@ if __name__ == "__main__":
         powerSpikes : dict = get_champion_powerSpikes(champion_name)
         powerSpikesDataList : list = powerSpikes["data"]["powerSpikesData"]
 
+        counters : dict = get_champion_counters(champion_name)
+        champMU : list = counters["data"]["championMatchupSpecificData"]
+        champRole : list = counters["data"]["championRoleData"]
+
         
-        for pwData, snwData in zip(powerSpikesDataList, snwDataList):
+        for pwData, snwData, champMUData, champRoleData in zip(powerSpikesDataList, snwDataList, champMU, champRole):
+            # For champRoleData
+            champRoleDataList : list = champRoleData["flatData"]["counterTips"]
+            for counterTips in champRoleDataList:
+                dataCounterTips : dict = {
+                    "text" : replace_within_double_curly_brackets(counterTips["text"])
+                }
+                lines.append(dataCounterTips)
+            
+            # For champMU data
+            dataChampMU : dict = {
+                "text": replace_within_double_curly_brackets(champMUData["flatData"]["matchupTips"])
+            }
+            lines.append(dataChampMU)
+            
+
             # For Strenght and weaknesses
-                
             dataSW1 : dict = {
                 "text": replace_within_double_curly_brackets(snwData["flatData"]["strengths"]),
                 
