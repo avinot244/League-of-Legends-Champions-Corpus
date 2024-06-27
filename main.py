@@ -1,15 +1,14 @@
-from packages.model import *
-from packages.utils import replace_within_double_curly_brackets
+from packages.utils import replace_within_double_curly_brackets, augment_data
 from packages.api_calls import get_champion_SnW, get_champion_powerSpikes, get_champion_counters
-
 
 import json
 from tqdm import tqdm
 import numpy as np
 
+# del pipe
+# torch.cuda.empty_cache()
+
 if __name__ == "__main__":
-
-
     with open("./champion_mapping.json", "r") as file:
         champion_mapping : dict = json.load(file)
 
@@ -39,27 +38,42 @@ if __name__ == "__main__":
                 dataCounterTips : dict = {
                     "text" : replace_within_double_curly_brackets(counterTips["text"])
                 }
+                dataCounterTipsAlternate : dict = {
+                    "text" :  augment_data(replace_within_double_curly_brackets(counterTips["text"]))
+                }
                 lines.append(dataCounterTips)
+                lines.append(dataCounterTipsAlternate)
             
             # For champMU data
             dataChampMU : dict = {
                 "text": replace_within_double_curly_brackets(champMUData["flatData"]["matchupTips"])
             }
+            dataChampMUAlternate : dict = {
+                "text": augment_data(replace_within_double_curly_brackets(champMUData["flatData"]["matchupTips"]))
+            }
             lines.append(dataChampMU)
+            lines.append(dataChampMUAlternate)
             
 
             # For Strenght and weaknesses
             dataSW1 : dict = {
                 "text": replace_within_double_curly_brackets(snwData["flatData"]["strengths"]),
-                
+            }
+            dataSW1Alternate : dict = {
+                "text": augment_data(replace_within_double_curly_brackets(snwData["flatData"]["strengths"]))
             }
 
             dataSW2 : dict = {
                 "text": replace_within_double_curly_brackets(snwData["flatData"]["weaknesses"])
             }
+            dataSW2Alternate : dict = {
+                "text": augment_data(replace_within_double_curly_brackets(snwData["flatData"]["weaknesses"]))
+            }
             
             lines.append(dataSW1)
+            lines.append(dataSW1Alternate)
             lines.append(dataSW2)
+            lines.append(dataSW2Alternate)
             
             # For Power spikes
             pwGameStages = pwData["flatData"]["gameStages"]
@@ -67,12 +81,20 @@ if __name__ == "__main__":
                 dataPS1 : dict = {
                     "text": replace_within_double_curly_brackets(pwGS["gamePlan"])
                 }
+                dataPS1Alternate : dict = {
+                    "text": augment_data(replace_within_double_curly_brackets(pwGS["gamePlan"]))
+                }
                 dataPS2 : dict = {
                     "text": replace_within_double_curly_brackets(pwGS["powerSpikeDescription"])
                 }
+                dataPS2Alternate : dict = {
+                    "text": augment_data(replace_within_double_curly_brackets(pwGS["powerSpikeDescription"]))
+                }
 
                 lines.append(dataPS1)
+                lines.append(dataPS1Alternate)
                 lines.append(dataPS2)
+                lines.append(dataPS2Alternate)
 
     db_size = len(lines)
     train_size = round(db_size * 0.80)

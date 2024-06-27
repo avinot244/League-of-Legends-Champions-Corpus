@@ -1,1 +1,3 @@
 token.json
+*.pyc
+./packages/__pycache__

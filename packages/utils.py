@@ -1,6 +1,7 @@
 
 import json
 import re
+from transformers import pipeline
 
 def saveToJson(data_dict : dict, json_path : str):
     with open(json_path, 'r') as file:
@@ -37,3 +38,24 @@ def replace_within_double_curly_brackets(text):
         text = text.replace('{{' + match + '}}', last_char)
 
     return text
+
+
+def get_token(option : str):
+    
+    with open("./token.json", "r") as f:
+        res = json.load(f)
+        if option == "read":
+            return res["read"]
+        elif option == "write":
+            return res["write"]
+        
+
+
+
+def augment_data(text : str):
+    pipe_en_fr = pipeline("translation", model="Helsinki-NLP/opus-mt-en-fr")
+    pipe_fr_en = pipeline("translation", model="Helsinki-NLP/opus-mt-fr-en")
+
+    text_fr = pipe_en_fr(text)[0]['translation_text']
+    text_en = pipe_fr_en(text_fr)[0]['translation_text']
+    return text_en
