@@ -1,6 +1,7 @@
 from packages.utils import replace_within_double_curly_brackets, augment_data
 from packages.api_calls import get_champion_SnW, get_champion_powerSpikes, get_champion_counters
 
+from transformers import pipeline
 import json
 from tqdm import tqdm
 import numpy as np
@@ -19,6 +20,8 @@ if __name__ == "__main__":
     row_idx : int = 0
 
     lines : list = []
+    pipeline_en_fr = pipeline("translation", model="Helsinki-NLP/opus-mt-en-fr")
+    pipeline_fr_en = pipeline("translation", model="Helsinki-NLP/opus-mt-fr-en")
     for champion_name in tqdm(champion_names):
         snw : dict = get_champion_SnW(champion_name)
         snwDataList : list = snw["data"]["guidesByRoleData"]
@@ -36,65 +39,58 @@ if __name__ == "__main__":
             champRoleDataList : list = champRoleData["flatData"]["counterTips"]
             for counterTips in champRoleDataList:
                 dataCounterTips : dict = {
-                    "text" : replace_within_double_curly_brackets(counterTips["text"])
-                }
-                dataCounterTipsAlternate : dict = {
-                    "text" :  augment_data(replace_within_double_curly_brackets(counterTips["text"]))
+                    "set" : [
+                        replace_within_double_curly_brackets(counterTips["text"]),
+                        augment_data(replace_within_double_curly_brackets(counterTips["text"]), pipeline_en_fr, pipeline_fr_en)
+                    ]
                 }
                 lines.append(dataCounterTips)
-                lines.append(dataCounterTipsAlternate)
             
             # For champMU data
             dataChampMU : dict = {
-                "text": replace_within_double_curly_brackets(champMUData["flatData"]["matchupTips"])
-            }
-            dataChampMUAlternate : dict = {
-                "text": augment_data(replace_within_double_curly_brackets(champMUData["flatData"]["matchupTips"]))
+                "set": [
+                    replace_within_double_curly_brackets(champMUData["flatData"]["matchupTips"]),
+                    augment_data(replace_within_double_curly_brackets(champMUData["flatData"]["matchupTips"]), pipeline_en_fr, pipeline_fr_en)
+                ]
             }
             lines.append(dataChampMU)
-            lines.append(dataChampMUAlternate)
-            
 
             # For Strenght and weaknesses
             dataSW1 : dict = {
-                "text": replace_within_double_curly_brackets(snwData["flatData"]["strengths"]),
-            }
-            dataSW1Alternate : dict = {
-                "text": augment_data(replace_within_double_curly_brackets(snwData["flatData"]["strengths"]))
+                "set": [
+                    replace_within_double_curly_brackets(snwData["flatData"]["strengths"]),
+                    augment_data(replace_within_double_curly_brackets(snwData["flatData"]["strengths"]), pipeline_en_fr, pipeline_fr_en)
+                ]
             }
 
             dataSW2 : dict = {
-                "text": replace_within_double_curly_brackets(snwData["flatData"]["weaknesses"])
-            }
-            dataSW2Alternate : dict = {
-                "text": augment_data(replace_within_double_curly_brackets(snwData["flatData"]["weaknesses"]))
+                "set": [
+                    replace_within_double_curly_brackets(snwData["flatData"]["weaknesses"]),
+                    augment_data(replace_within_double_curly_brackets(snwData["flatData"]["weaknesses"]), pipeline_en_fr, pipeline_fr_en)
+                ]
             }
             
             lines.append(dataSW1)
-            lines.append(dataSW1Alternate)
             lines.append(dataSW2)
-            lines.append(dataSW2Alternate)
             
             # For Power spikes
             pwGameStages = pwData["flatData"]["gameStages"]
             for pwGS in pwGameStages:
                 dataPS1 : dict = {
-                    "text": replace_within_double_curly_brackets(pwGS["gamePlan"])
-                }
-                dataPS1Alternate : dict = {
-                    "text": augment_data(replace_within_double_curly_brackets(pwGS["gamePlan"]))
+                    "set": [
+                        replace_within_double_curly_brackets(pwGS["gamePlan"]),
+                        augment_data(replace_within_double_curly_brackets(pwGS["gamePlan"]), pipeline_en_fr, pipeline_fr_en)
+                    ]
                 }
                 dataPS2 : dict = {
-                    "text": replace_within_double_curly_brackets(pwGS["powerSpikeDescription"])
-                }
-                dataPS2Alternate : dict = {
-                    "text": augment_data(replace_within_double_curly_brackets(pwGS["powerSpikeDescription"]))
+                    "set": [
+                        replace_within_double_curly_brackets(pwGS["powerSpikeDescription"]),
+                        augment_data(replace_within_double_curly_brackets(pwGS["powerSpikeDescription"]), pipeline_en_fr, pipeline_fr_en)
+                    ]
                 }
 
                 lines.append(dataPS1)
-                lines.append(dataPS1Alternate)
                 lines.append(dataPS2)
-                lines.append(dataPS2Alternate)
 
     db_size = len(lines)
     train_size = round(db_size * 0.80)
@@ -103,11 +99,11 @@ if __name__ == "__main__":
     train_data = lines[:train_size]
     test_data = lines[train_size + 1:]
 
-    with open("train-lol-champs.jsonl", "w") as f:
+    with open("train-lol-champs-pair.jsonl", "w") as f:
         for line in train_data:
             f.write(json.dumps(line) + "\n")
 
-    with open("test-lol-champs.jsonl", "w") as f:
+    with open("test-lol-champs-pair.jsonl", "w") as f:
         for line in test_data:
             f.write(json.dumps(line) + "\n")
 
