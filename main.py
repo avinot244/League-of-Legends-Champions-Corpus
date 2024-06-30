@@ -1,6 +1,6 @@
 from packages.utils import replace_within_double_curly_brackets
-from packages.api_calls import get_champion_SnW, get_champion_powerSpikes, get_champion_counters
-from packages.translation_augmentation import augment_data
+from packages.db_manager.mobalytics.api_calls_mobalytics import *
+from packages.models.translation_augmentation import augment_data
 
 from transformers import pipeline
 import json
@@ -9,7 +9,7 @@ import numpy as np
 
 
 if __name__ == "__main__":
-    with open("./champion_mapping.json", "r") as file:
+    with open("./datasets/champion_mapping.json", "r") as file:
         champion_mapping : dict = json.load(file)
 
     champion_names : list[str] = list(champion_mapping.keys())
