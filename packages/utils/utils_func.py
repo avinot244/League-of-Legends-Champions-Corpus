@@ -10,7 +10,6 @@ def saveToJson(data_dict : dict, json_path : str):
     with open(json_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-
 def replace_within_double_curly_brackets(text):
     if text == None:
         return ""
@@ -27,7 +26,6 @@ def replace_within_double_curly_brackets(text):
 
     return text
 
-
 def get_token(option : str):
     with open("./token.json", "r") as f:
         res = json.load(f)
@@ -35,8 +33,4 @@ def get_token(option : str):
             return res["read"]
         elif option == "write":
             return res["write"]
-        
-
-
-
 
