@@ -1,13 +1,12 @@
-from packages.utils import replace_within_double_curly_brackets, augment_data
+from packages.utils import replace_within_double_curly_brackets
 from packages.api_calls import get_champion_SnW, get_champion_powerSpikes, get_champion_counters
+from packages.translation_augmentation import augment_data
 
 from transformers import pipeline
 import json
 from tqdm import tqdm
 import numpy as np
 
-# del pipe
-# torch.cuda.empty_cache()
 
 if __name__ == "__main__":
     with open("./champion_mapping.json", "r") as file:
