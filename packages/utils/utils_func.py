@@ -27,7 +27,7 @@ def replace_within_double_curly_brackets(text):
     return text
 
 def get_token(option : str):
-    with open("./token.json", "r") as f:
+    with open("./datasets/token.json", "r") as f:
         res = json.load(f)
         if option == "read":
             return res["read"]

@@ -2,6 +2,7 @@ from datasets import load_dataset
 from sentence_transformers import InputExample, SentenceTransformer, models, losses
 from torch.utils.data import DataLoader
 from packages.utils.utils_func import get_token
+import os
 
 def prepare_model() -> SentenceTransformer:
     print(f"{' Setting up the model ' :#^50}")
