@@ -2,7 +2,7 @@ from datasets import load_dataset
 from sentence_transformers import InputExample, SentenceTransformer, models, losses
 from torch.utils.data import DataLoader
 from packages.utils.utils_func import get_token
-import os
+import torch
 
 def prepare_model() -> SentenceTransformer:
     print(f"{' Setting up the model ' :#^50}")
@@ -33,8 +33,18 @@ def train_model(model : SentenceTransformer, train_dataloader : DataLoader):
     train_loss  = losses.MultipleNegativesRankingLoss(model=model)
     model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=10)
     write_token = get_token("write")
-    model.save_to_hub(
+    model.push_to_hub(
         "distilroberta-base-LoL-Champions",
         token=write_token,
         train_datasets=["avinot/LoL-Champions-semantic-classification"]
     )
+
+def getSimilarity(word1 : str, word2 : str) -> torch.Tensor:
+    model = SentenceTransformer("avinot/distilroberta-base-LoL-Champions")
+    embedding1 = model.encode(word1)
+    embedding2 = model.encode(word2)
+    similarity = model.similarity(embedding1, embedding2)
+    print("Similarity of {} and {} : {}".format(word1, word2, similarity))
+    print(type(similarity))
+    return similarity
+    

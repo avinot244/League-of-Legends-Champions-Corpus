@@ -9,7 +9,7 @@ import numpy as np
 
 
 def create_semantic_classification_dataset():
-    with open("../datasets/champion_mapping.json", "r") as file:
+    with open("./datasets/champion_mapping.json", "r") as file:
         champion_mapping : dict = json.load(file)
 
         champion_names : list[str] = list(champion_mapping.keys())
@@ -39,8 +39,8 @@ def create_semantic_classification_dataset():
                 for counterTips in champRoleDataList:
                     dataCounterTips : dict = {
                         "set" : [
-                            replace_within_double_curly_brackets(counterTips["text"]),
-                            augment_data(replace_within_double_curly_brackets(counterTips["text"]), pipeline_en_fr, pipeline_fr_en)
+                            "As {}, {}".format(champion_name,replace_within_double_curly_brackets(counterTips["text"])),
+                            "As {}, {}".format(champion_name,augment_data(replace_within_double_curly_brackets(counterTips["text"]), pipeline_en_fr, pipeline_fr_en))
                         ]
                     }
                     lines.append(dataCounterTips)
@@ -48,8 +48,8 @@ def create_semantic_classification_dataset():
                 # For champMU data
                 dataChampMU : dict = {
                     "set": [
-                        replace_within_double_curly_brackets(champMUData["flatData"]["matchupTips"]),
-                        augment_data(replace_within_double_curly_brackets(champMUData["flatData"]["matchupTips"]), pipeline_en_fr, pipeline_fr_en)
+                        "As {}, {}".format(champion_name,replace_within_double_curly_brackets(champMUData["flatData"]["matchupTips"])),
+                        "As {}, {}".format(champion_name,augment_data(replace_within_double_curly_brackets(champMUData["flatData"]["matchupTips"]), pipeline_en_fr, pipeline_fr_en))
                     ]
                 }
                 lines.append(dataChampMU)
@@ -57,15 +57,15 @@ def create_semantic_classification_dataset():
                 # For Strenght and weaknesses
                 dataSW1 : dict = {
                     "set": [
-                        replace_within_double_curly_brackets(snwData["flatData"]["strengths"]),
-                        augment_data(replace_within_double_curly_brackets(snwData["flatData"]["strengths"]), pipeline_en_fr, pipeline_fr_en)
+                        "As {}, {}".format(champion_name,replace_within_double_curly_brackets(snwData["flatData"]["strengths"])),
+                        "As {}, {}".format(champion_name,augment_data(replace_within_double_curly_brackets(snwData["flatData"]["strengths"]), pipeline_en_fr, pipeline_fr_en))
                     ]
                 }
 
                 dataSW2 : dict = {
                     "set": [
-                        replace_within_double_curly_brackets(snwData["flatData"]["weaknesses"]),
-                        augment_data(replace_within_double_curly_brackets(snwData["flatData"]["weaknesses"]), pipeline_en_fr, pipeline_fr_en)
+                        "As {}, {}".format(champion_name,replace_within_double_curly_brackets(snwData["flatData"]["weaknesses"])),
+                        "As {}, {}".format(champion_name,augment_data(replace_within_double_curly_brackets(snwData["flatData"]["weaknesses"]), pipeline_en_fr, pipeline_fr_en))
                     ]
                 }
                 
@@ -77,14 +77,14 @@ def create_semantic_classification_dataset():
                 for pwGS in pwGameStages:
                     dataPS1 : dict = {
                         "set": [
-                            replace_within_double_curly_brackets(pwGS["gamePlan"]),
-                            augment_data(replace_within_double_curly_brackets(pwGS["gamePlan"]), pipeline_en_fr, pipeline_fr_en)
+                            "As {}, {}".format(champion_name,replace_within_double_curly_brackets(pwGS["gamePlan"])),
+                            "As {}, {}".format(champion_name,augment_data(replace_within_double_curly_brackets(pwGS["gamePlan"]), pipeline_en_fr, pipeline_fr_en))
                         ]
                     }
                     dataPS2 : dict = {
                         "set": [
-                            replace_within_double_curly_brackets(pwGS["powerSpikeDescription"]),
-                            augment_data(replace_within_double_curly_brackets(pwGS["powerSpikeDescription"]), pipeline_en_fr, pipeline_fr_en)
+                            "As {}, {}".format(champion_name,replace_within_double_curly_brackets(pwGS["powerSpikeDescription"])),
+                            "As {}, {}".format(champion_name,augment_data(replace_within_double_curly_brackets(pwGS["powerSpikeDescription"]), pipeline_en_fr, pipeline_fr_en))
                         ]
                     }
 
