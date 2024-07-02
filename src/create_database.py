@@ -39,8 +39,8 @@ def create_semantic_classification_dataset():
                 for counterTips in champRoleDataList:
                     dataCounterTips : dict = {
                         "set" : [
-                            "As {}, {}".format(champion_name,replace_within_double_curly_brackets(counterTips["text"])),
-                            "As {}, {}".format(champion_name,augment_data(replace_within_double_curly_brackets(counterTips["text"]), pipeline_en_fr, pipeline_fr_en))
+                            "Against {}, {}".format(champion_name,replace_within_double_curly_brackets(counterTips["text"])),
+                            "Against {}, {}".format(champion_name,augment_data(replace_within_double_curly_brackets(counterTips["text"]), pipeline_en_fr, pipeline_fr_en))
                         ]
                     }
                     lines.append(dataCounterTips)
