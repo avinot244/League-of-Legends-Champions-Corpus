@@ -33,4 +33,3 @@ def get_token(option : str):
             return res["read"]
         elif option == "write":
             return res["write"]
-
