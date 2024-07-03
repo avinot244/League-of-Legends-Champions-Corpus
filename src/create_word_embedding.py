@@ -26,7 +26,7 @@ def clusteringChamps():
         corpus_embeddings = embedder.encode(corpus)
 
 
-        num_clusters = 6
+        num_clusters = 5
         clustering_model = KMeans(n_clusters=num_clusters)
         clustering_model.fit(corpus_embeddings)
         cluster_assignment = clustering_model.labels_
