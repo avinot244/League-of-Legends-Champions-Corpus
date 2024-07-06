@@ -19,6 +19,15 @@ def prepare_dataset_w2v():
                 for sentence in sent_tokenize(v):
                     sentence_tokenized.append(word_tokenize(sentence.lower()))
                 tokenized_lines += sentence_tokenized
+    
+    with open(DATASETS_PATH + "w2v/test-lol-champs-w2v.jsonl") as file:
+        for line in file:
+            dataset : dict = json.loads(line)
+            for k, v in dataset.items():
+                sentence_tokenized : list = list()
+                for sentence in sent_tokenize(v):
+                    sentence_tokenized.append(word_tokenize(sentence.lower()))
+                tokenized_lines += sentence_tokenized
     return tokenized_lines
 
 def train_model_w2v(model : Word2Vec, dataset : list):
