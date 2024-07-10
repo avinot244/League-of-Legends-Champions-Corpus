@@ -2,9 +2,9 @@ from packages.utils.utils_func import replace_within_double_curly_brackets
 from packages.db_manager.mobalytics.api_calls_mobalytics import *
 from packages.models.translation_augmentation import augment_data
 from packages.utils.globals import DB_TYPES, DATASETS_PATH
+from packages.db_manager.youtube.api_calls_youtube import get_playlist_videos, get_playlist_id, download_audio
 
 from transformers.pipelines.text2text_generation import TranslationPipeline
-
 from transformers import pipeline
 import json
 from tqdm import tqdm
@@ -103,4 +103,10 @@ def create_mobalytics_dataset(db_name : str, db_type : str):
             for line in test_data:
                 f.write(json.dumps(line) + "\n")
 
-
+def create_youtube_dataset():
+    # https://youtube.com/playlist?list=PLHdLJeeTQbtIrtOwvmJcO6XkKK5KKp18T&si=lDKE3JfRxGRBVE69
+    playlist_id : str = get_playlist_id("https://youtube.com/playlist?list=PLHdLJeeTQbtIrtOwvmJcO6XkKK5KKp18T&si=lDKE3JfRxGRBVE69")
+    url_list : list[str] = get_playlist_videos(playlist_id)[:-3]
+    
+    for url in url_list:
+        download_audio(url, DATASETS_PATH + "/youtube")
