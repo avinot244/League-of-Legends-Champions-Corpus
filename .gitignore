@@ -1,4 +1,5 @@
 token.json
 token_ytb.json
+./datasets
 *.pyc
 ./packages/__pycache__
