@@ -1,3 +1,4 @@
 token.json
+token_ytb.json
 *.pyc
 ./packages/__pycache__
