@@ -3,12 +3,16 @@ from packages.db_manager.mobalytics.api_calls_mobalytics import *
 from packages.models.translation_augmentation import augment_data
 from packages.utils.globals import DB_TYPES, DATASETS_PATH
 from packages.db_manager.youtube.api_calls_youtube import get_playlist_videos, get_playlist_id, download_audio
+from packages.utils.utils_func import get_token
 
 from transformers.pipelines.text2text_generation import TranslationPipeline
+from transformers import WhisperProcessor, WhisperForConditionalGeneration
+from datasets import load_dataset
 from transformers import pipeline
 import json
 from tqdm import tqdm
 import numpy as np
+import torch
 
 def create_line(text : str, champion_name : str, context : str, db_type : str, buffer : list, pipeline_en_fr : TranslationPipeline, pipeline_fr_en : TranslationPipeline):
     assert db_type in DB_TYPES
@@ -103,10 +107,48 @@ def create_mobalytics_dataset(db_name : str, db_type : str):
             for line in test_data:
                 f.write(json.dumps(line) + "\n")
 
-def create_youtube_dataset():
+def get_mp3_files():
     # https://youtube.com/playlist?list=PLHdLJeeTQbtIrtOwvmJcO6XkKK5KKp18T&si=lDKE3JfRxGRBVE69
     playlist_id : str = get_playlist_id("https://youtube.com/playlist?list=PLHdLJeeTQbtIrtOwvmJcO6XkKK5KKp18T&si=lDKE3JfRxGRBVE69")
     url_list : list[str] = get_playlist_videos(playlist_id)[:-3]
     
     for url in url_list:
         download_audio(url, DATASETS_PATH + "/youtube")
+
+def create_line_yt(sample, model, processor):
+    input_features = processor(sample["array"], sampling_rate=sample["sampling_rate"], return_tensors="pt").input_features
+    predicted_ids = model.generate(input_features)
+    transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)
+    return transcription
+
+def create_youtube_dataset():
+    hf_read = get_token("read")
+    
+    
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    
+    pipe = pipeline(
+        "automatic-speech-recognition",
+        model="openai/whisper-small",
+        chunk_length_s=30,
+        device=device
+    )
+    
+    ds = load_dataset("avinot/LoL-Champion-Guides-audio", token=hf_read, split="train")
+    
+    for line in tqdm(ds):
+        sample = line["audio"]
+        label = line["label"]
+        id = line["id"]
+        
+        prediction = pipe(sample.copy(), batch_size=8)
+        data : dict = {
+            "text": prediction["text"],
+            "label": label,
+            "id": id,
+        }
+        with open(DATASETS_PATH + "youtube/text/{}-{}.json".format(id, label), "w") as f:
+            json.dump(data, f)
+            
+            
+   

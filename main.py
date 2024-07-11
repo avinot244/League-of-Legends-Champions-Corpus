@@ -1,5 +1,6 @@
-from src.create_database import create_mobalytics_dataset, create_youtube_dataset
+from src.create_database import create_mobalytics_dataset, get_mp3_files, create_youtube_dataset
 from src.create_word_embedding import create_bert_word_embedding, create_word2vec_word_embedding
+from packages.db_manager.youtube.youtube_data import push_audio_dataset
 from packages.utils.globals import DATASETS_PATH
 
 import numpy
@@ -12,7 +13,8 @@ from sklearn.cluster import KMeans
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--create-db-mobalytics", action="store_true", default=False, help="Create database from mobalytics")
-    parser.add_argument("--create-db-youtube", action="store_true", default=False, help="Creat database from youtube")
+    parser.add_argument("--create-db-youtube", action="store_true", default=False, help="Create database from youtube")
+    parser.add_argument("--push-db-youtube", action="store_true", default=False, help="Putsh to HF dataset from youtube")
     parser.add_argument("--db-type", metavar="[str]", type=str, help="Tells wich type of database you want to create")
     parser.add_argument("--db-name", metavar="[str]", type=str, help="Name of database")
     parser.add_argument("--word-embedding", metavar="[BERT/Word2Vec]", type=str, help="Create word embedding model from our dataset")
@@ -28,8 +30,12 @@ if __name__ == "__main__":
         create_mobalytics_dataset(db_name, db_type)
         
     elif args_data["create_db_youtube"]:
+        # push_audio_dataset()
         create_youtube_dataset()
-        
+    
+    elif args_data["push_db_youtube"]:
+        push_audio_dataset()
+    
     elif args_data["word_embedding"] == "BERT":
         create_bert_word_embedding()
         
