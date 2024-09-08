@@ -5,6 +5,7 @@ from gensim.models.keyedvectors import KeyedVectors
 
 from packages.models.sentence_transformer import prepare_dataset_bert, prepare_model_bert, train_model_bert
 from packages.models.w2v.word2vec import prepare_dataset_w2v, train_model_w2v
+
 def create_bert_word_embedding():
     model : SentenceTransformer = prepare_model_bert()
     dataset : DataLoader = prepare_dataset_bert()

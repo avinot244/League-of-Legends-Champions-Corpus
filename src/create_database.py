@@ -4,15 +4,17 @@ from packages.models.translation_augmentation import augment_data
 from packages.utils.globals import DB_TYPES, DATASETS_PATH
 from packages.db_manager.youtube.api_calls_youtube import get_playlist_videos, get_playlist_id, download_audio
 from packages.utils.utils_func import get_token
+from packages.commons import propositionizer
 
 from transformers.pipelines.text2text_generation import TranslationPipeline
-from transformers import WhisperProcessor, WhisperForConditionalGeneration
+import transformers
 from datasets import load_dataset
 from transformers import pipeline
 import json
 from tqdm import tqdm
 import numpy as np
 import torch
+import os
 
 def create_line(text : str, champion_name : str, context : str, db_type : str, buffer : list, pipeline_en_fr : TranslationPipeline, pipeline_fr_en : TranslationPipeline):
     assert db_type in DB_TYPES
@@ -122,6 +124,7 @@ def create_line_yt(sample, model, processor):
     return transcription
 
 def create_youtube_dataset():
+    transformers.logging.set_verbosity_error()
     hf_read = get_token("read")
     
     
@@ -136,19 +139,28 @@ def create_youtube_dataset():
     
     ds = load_dataset("avinot/LoL-Champion-Guides-audio", token=hf_read, split="train")
     
-    for line in tqdm(ds):
+    for line in tqdm(ds, position=0):
         sample = line["audio"]
         label = line["label"]
         id = line["id"]
         
+        
+        
         prediction = pipe(sample.copy(), batch_size=8)
-        data : dict = {
-            "text": prediction["text"],
-            "label": label,
-            "id": id,
-        }
-        with open(DATASETS_PATH + "youtube/text/{}-{}.json".format(id, label), "w") as f:
-            json.dump(data, f)
+        
+        text_list : list[str] = propositionizer(label, "", prediction["text"])
+        
+        for idx, text in enumerate(text_list):
+            data : dict = {
+               "text": text,
+                "label": label,
+                "id": id, 
+            }
+            if not(os.path.exists(DATASETS_PATH + "youtube/text/{}/".format(label))):
+                os.mkdir(DATASETS_PATH + "youtube/text/{}/".format(label))
+            
+            with open(DATASETS_PATH + "youtube/text/{}/{}-{}.json".format(label, id, idx), "w") as f:
+                json.dump(data, f)
             
             
    

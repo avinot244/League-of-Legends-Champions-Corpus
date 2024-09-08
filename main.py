@@ -1,14 +1,11 @@
-from src.create_database import create_mobalytics_dataset, get_mp3_files, create_youtube_dataset
+from src.create_database import create_mobalytics_dataset, create_youtube_dataset
 from src.create_word_embedding import create_bert_word_embedding, create_word2vec_word_embedding
 from packages.db_manager.youtube.youtube_data import push_audio_dataset
-from packages.utils.globals import DATASETS_PATH
 
-import numpy
 import json
 import argparse
 from gensim.models.keyedvectors import KeyedVectors
 import uuid
-from sklearn.cluster import KMeans
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
