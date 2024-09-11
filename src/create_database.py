@@ -6,7 +6,11 @@ from packages.db_manager.youtube.api_calls_youtube import get_playlist_videos, g
 from packages.utils.utils_func import get_token
 from packages.commons import propositionizer
 
+
 from transformers.pipelines.text2text_generation import TranslationPipeline
+from transformers.models.t5.modeling_t5 import T5ForConditionalGeneration
+from transformers.models.t5.tokenization_t5_fast import T5TokenizerFast
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import transformers
 from datasets import load_dataset
 from transformers import pipeline
@@ -16,43 +20,59 @@ import numpy as np
 import torch
 import os
 
-def create_line(text : str, champion_name : str, context : str, db_type : str, buffer : list, pipeline_en_fr : TranslationPipeline, pipeline_fr_en : TranslationPipeline):
+def create_line(
+    title : str, 
+    text : str, 
+    db_type : str, 
+    buffer : list[str], 
+    pipeline_en_fr : TranslationPipeline, 
+    pipeline_fr_en : TranslationPipeline,
+    model : T5ForConditionalGeneration,
+    tokenizer : T5TokenizerFast,
+    device : str
+) -> list[str]:
+    
     assert db_type in DB_TYPES
-    if db_type == "fill-mask":
-        data : dict = {
-            "text" : "{} {}, {}".format(context, champion_name, replace_within_double_curly_brackets(text))
-        }
-        buffer.append(data)
-        
-        data_bis : dict = {
-            "text" : "{} {}, {}".format(context, champion_name, augment_data(replace_within_double_curly_brackets(text), pipeline_en_fr, pipeline_fr_en))
-        }
-        buffer.append(data_bis)
-        
+    new_text : str = replace_within_double_curly_brackets(text)
+    prop_list : list[str] = propositionizer(
+        title, 
+        "", 
+        new_text,
+        model,
+        tokenizer,
+        device)
+    if db_type == "fill-mask" or db_type == "w2v":        
+        for prop in prop_list:
+            data : dict = {
+                "label": title,
+                "text": prop
+            }
+            data_bis : dict = {
+                "label": title,
+                "text": augment_data(prop, pipeline_en_fr, pipeline_fr_en)
+            }
+            buffer.append(data)
+            buffer.append(data_bis)
+
     elif db_type == "semantic-similarity":
-        data : dict = {
-            "set" : [
-                "{} {}, {}".format(context, champion_name, replace_within_double_curly_brackets(text)),
-                "{} {}, {}".format(context, champion_name, augment_data(replace_within_double_curly_brackets(text)), pipeline_en_fr, pipeline_fr_en),
-            ]
-        }
+        for prop in prop_list:
+            data : dict = {
+                "label": title,
+                "set" : [
+                    prop,
+                    augment_data(prop, pipeline_en_fr, pipeline_fr_en)
+                ]
+            }
         buffer.append(data)
-        
-    elif db_type == "w2v":
-        data : dict = {
-            "text" : "{} {}, {}".format(context, champion_name, replace_within_double_curly_brackets(text))
-        }
-        buffer.append(data)
-        
-        data_bis : dict = {
-            "text" : "{} {}, {}".format(context, champion_name, augment_data(replace_within_double_curly_brackets(text), pipeline_en_fr, pipeline_fr_en))
-        }
-        buffer.append(data_bis)
         
     return buffer
 
-def create_mobalytics_dataset(db_name : str, db_type : str):
+def create_mobalytics_dataset(
+    db_name : str,
+    db_type : str
+) -> None:
     assert db_type in DB_TYPES
+    transformers.logging.set_verbosity_error()
     with open(DATASETS_PATH + "champion_mapping.json", "r") as file:
         champion_mapping : dict = json.load(file)
 
@@ -63,7 +83,12 @@ def create_mobalytics_dataset(db_name : str, db_type : str):
         lines : list = []
         pipeline_en_fr : TranslationPipeline= pipeline("translation", model="Helsinki-NLP/opus-mt-en-fr")
         pipeline_fr_en : TranslationPipeline= pipeline("translation", model="Helsinki-NLP/opus-mt-fr-en")
-        print(type(pipeline_fr_en))
+        
+        model_name = "chentong00/propositionizer-wiki-flan-t5-large"
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to(device)
+        
         for champion_name in tqdm(champion_names):
             snw : dict = get_champion_SnW(champion_name)
             snwDataList : list = snw["data"]["guidesByRoleData"]
@@ -77,37 +102,106 @@ def create_mobalytics_dataset(db_name : str, db_type : str):
 
             
             for pwData, snwData, champMUData, champRoleData in zip(powerSpikesDataList, snwDataList, champMU, champRole):
+                # print("Counter match up tips")
                 # For counter match up tips
                 champRoleDataList : list = champRoleData["flatData"]["counterTips"]
                 for counterTips in champRoleDataList:
-                    lines = create_line(counterTips["text"], champion_name, "Against", db_type, lines, pipeline_en_fr, pipeline_fr_en)
+                    lines = create_line(
+                        f"Against {champion_name}",
+                        counterTips["text"], 
+                        db_type, 
+                        lines, 
+                        pipeline_en_fr, 
+                        pipeline_fr_en,
+                        model,
+                        tokenizer,
+                        device
+                    )
                 
                 # For champMU data
-                lines = create_line(champMUData["flatData"]["matchupTips"], champion_name, "As", db_type, lines, pipeline_en_fr, pipeline_fr_en)
+                # print("Match up")
+                lines = create_line(
+                    champion_name, 
+                    champMUData["flatData"]["matchupTips"], 
+                    db_type, 
+                    lines, 
+                    pipeline_en_fr, 
+                    pipeline_fr_en,
+                    model,
+                    tokenizer,
+                    device
+                )
 
+                # print("Strenghts and weaknesses")
                 # For Strenght and weaknesses
-                lines = create_line(snwData["flatData"]["strengths"], champion_name, "As", db_type, lines, pipeline_en_fr, pipeline_fr_en)
-                lines = create_line(snwData["flatData"]["weaknesses"], champion_name, "As", db_type, lines, pipeline_en_fr, pipeline_fr_en)
+                lines = create_line(
+                    champion_name, 
+                    snwData["flatData"]["strengths"], 
+                    db_type, 
+                    lines, 
+                    pipeline_en_fr, 
+                    pipeline_fr_en,
+                    model,
+                    tokenizer,
+                    device
+                )
+                lines = create_line(
+                    champion_name, 
+                    snwData["flatData"]["weaknesses"], 
+                    db_type, 
+                    lines, 
+                    pipeline_en_fr, 
+                    pipeline_fr_en,
+                    model,
+                    tokenizer,
+                    device
+                )
                 
+                # print("Power Spikes")
                 # For Power spikes
                 pwGameStages = pwData["flatData"]["gameStages"]
-                for pwGS in pwGameStages:
-                    lines = create_line(pwGS["gamePlan"], champion_name, "As", db_type, lines, pipeline_en_fr, pipeline_fr_en)
-                    lines = create_line(pwGS["powerSpikeDescription"], champion_name, "As", db_type, lines, pipeline_en_fr, pipeline_fr_en)
-        db_size = len(lines)
-        train_size = round(db_size * 0.80)
+                for pwGS in tqdm(pwGameStages):
+                    lines = create_line(
+                        champion_name, 
+                        pwGS["gamePlan"], 
+                        db_type, 
+                        lines, 
+                        pipeline_en_fr, 
+                        pipeline_fr_en,
+                        model,
+                        tokenizer,
+                        device
+                    )
+                    lines = create_line(
+                        champion_name, 
+                        pwGS["powerSpikeDescription"], 
+                        db_type, 
+                        lines, 
+                        pipeline_en_fr, 
+                        pipeline_fr_en,
+                        model,
+                        tokenizer,
+                        device
+                    )
+                
+                with open(DATASETS_PATH + f"{db_type}/{db_name}.jsonl", "w") as f:
+                    for line in lines:
+                        f.write(json.dumps(line) + "\n")
+        
+        # db_size = len(lines)
+        # train_size = round(db_size * 0.80)
 
-        np.random.shuffle(lines)
-        train_data = lines[:train_size]
-        test_data = lines[train_size + 1:]
+        # np.random.shuffle(lines)
+        # train_data = lines[:train_size]
+        # test_data = lines[train_size + 1:]
 
-        with open(DATASETS_PATH + "{}/train-{}.jsonl".format(db_type, db_name), "w") as f:
-            for line in train_data:
-                f.write(json.dumps(line) + "\n")
+        # with open(DATASETS_PATH + "{}/train-{}.jsonl".format(db_type, db_name), "w") as f:
+        #     for line in train_data:
+        #         f.write(json.dumps(line) + "\n")
 
-        with open(DATASETS_PATH + "{}/test-{}.jsonl".format(db_type, db_name), "w") as f:
-            for line in test_data:
-                f.write(json.dumps(line) + "\n")
+        # with open(DATASETS_PATH + "{}/test-{}.jsonl".format(db_type, db_name), "w") as f:
+        #     for line in test_data:
+        #         f.write(json.dumps(line) + "\n")
 
 def get_mp3_files():
     # https://youtube.com/playlist?list=PLHdLJeeTQbtIrtOwvmJcO6XkKK5KKp18T&si=lDKE3JfRxGRBVE69
@@ -138,6 +232,10 @@ def create_youtube_dataset():
     )
     
     ds = load_dataset("avinot/LoL-Champion-Guides-audio", token=hf_read, split="train")
+    model_name = "chentong00/propositionizer-wiki-flan-t5-large"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to(device)
     
     for line in tqdm(ds, position=0):
         sample = line["audio"]
@@ -148,7 +246,13 @@ def create_youtube_dataset():
         
         prediction = pipe(sample.copy(), batch_size=8)
         
-        text_list : list[str] = propositionizer(label, "", prediction["text"])
+        text_list : list[str] = propositionizer(
+            label, 
+            "", 
+            prediction["text"],
+            model,
+            tokenizer,
+            device)
         
         for idx, text in enumerate(text_list):
             data : dict = {
@@ -161,6 +265,3 @@ def create_youtube_dataset():
             
             with open(DATASETS_PATH + "youtube/text/{}/{}-{}.json".format(label, id, idx), "w") as f:
                 json.dump(data, f)
-            
-            
-   

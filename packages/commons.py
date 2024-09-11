@@ -1,4 +1,6 @@
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer
+from transformers.models.t5.modeling_t5 import T5ForConditionalGeneration
+from transformers.models.t5.tokenization_t5_fast import T5TokenizerFast
 import torch
 import json
 from tqdm import tqdm
@@ -21,17 +23,19 @@ def split_text(text : str, tokenizer : AutoTokenizer, max_length : int = 350):
     res.append(chunk)
     return res
 
-def propositionizer(title : str, section : str, content : str) -> list[str]:
-    model_name = "chentong00/propositionizer-wiki-flan-t5-large"
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to(device)
-
+def propositionizer(
+    title : str, 
+    section : str, 
+    content : str, 
+    model : T5ForConditionalGeneration,
+    tokenizer : T5TokenizerFast,
+    device : str
+) -> list[str]:
     splitted_content : list[str] = split_text(content, tokenizer)
     
     res : list[str] = []
     
-    for content_split in tqdm(splitted_content, leave=False, position=1):
+    for content_split in splitted_content:
         input_text = f"Title: {title}. Section: {section}. Content: {content_split}"
         input_ids = tokenizer(input_text, return_tensors="pt").input_ids
         outputs = model.generate(input_ids.to(device), max_new_tokens=512).cpu()
