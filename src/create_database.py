@@ -160,7 +160,7 @@ def create_mobalytics_dataset(
                 # print("Power Spikes")
                 # For Power spikes
                 pwGameStages = pwData["flatData"]["gameStages"]
-                for pwGS in tqdm(pwGameStages):
+                for pwGS in pwGameStages:
                     lines = create_line(
                         champion_name, 
                         pwGS["gamePlan"], 
