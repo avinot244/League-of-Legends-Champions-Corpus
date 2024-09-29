@@ -1,9 +1,12 @@
 from transformers import AutoTokenizer
 from transformers.models.t5.modeling_t5 import T5ForConditionalGeneration
 from transformers.models.t5.tokenization_t5_fast import T5TokenizerFast
-import torch
+from transformers.pipelines.text2text_generation import TranslationPipeline
+from transformers import logging
 import json
-from tqdm import tqdm
+import ollama
+
+from .utils.globals import PROMPT_PROPOSITIONIZER
 
 def token_length(word : str, tokenizer):
     return len(tokenizer.tokenize(word))
@@ -50,3 +53,33 @@ def propositionizer(
         
         
     return res
+
+def propositioner_llama(
+    title : str,
+    section : str,
+    content : str
+) -> str: 
+    logging.set_verbosity_error()
+
+    # Propositionizing the content
+    input_text = f"Decompose the following:\nTitle: {title}. Section: {section}. Content: {content}"
+
+    chat_history : list[dict] = list()
+    chat_history.append({
+        "role": "system",
+        "content": PROMPT_PROPOSITIONIZER
+    })
+
+    chat_history.append({
+        "role": "user",
+        "content": input_text
+    })
+
+    response = ollama.chat("llama3.2:3b", messages=chat_history)
+    
+    try:
+        prop_list = json.loads(response["message"]["content"])
+    except:
+        prop_list = []
+    
+    return prop_list

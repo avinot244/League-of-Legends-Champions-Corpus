@@ -4,7 +4,7 @@ from packages.models.translation_augmentation import augment_data
 from packages.utils.globals import DB_TYPES, DATASETS_PATH
 from packages.db_manager.youtube.api_calls_youtube import get_playlist_videos, get_playlist_id, download_audio
 from packages.utils.utils_func import get_token
-from packages.commons import propositionizer
+from packages.commons import propositionizer, propositioner_llama
 
 
 from transformers.pipelines.text2text_generation import TranslationPipeline
@@ -34,13 +34,11 @@ def create_line(
     
     assert db_type in DB_TYPES
     new_text : str = replace_within_double_curly_brackets(text)
-    prop_list : list[str] = propositionizer(
+    prop_list : list[str] = propositioner_llama(
         title, 
         "", 
-        new_text,
-        model,
-        tokenizer,
-        device)
+        new_text
+    )
     if db_type == "fill-mask" or db_type == "w2v":        
         for prop in prop_list:
             data : dict = {
@@ -211,12 +209,6 @@ def get_mp3_files():
     for url in url_list:
         download_audio(url, DATASETS_PATH + "/youtube")
 
-def create_line_yt(sample, model, processor):
-    input_features = processor(sample["array"], sampling_rate=sample["sampling_rate"], return_tensors="pt").input_features
-    predicted_ids = model.generate(input_features)
-    transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)
-    return transcription
-
 def create_youtube_dataset():
     transformers.logging.set_verbosity_error()
     hf_read = get_token("read")
@@ -232,10 +224,6 @@ def create_youtube_dataset():
     )
     
     ds = load_dataset("avinot/LoL-Champion-Guides-audio", token=hf_read, split="train")
-    model_name = "chentong00/propositionizer-wiki-flan-t5-large"
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to(device)
     
     for line in tqdm(ds, position=0):
         sample = line["audio"]
@@ -246,22 +234,23 @@ def create_youtube_dataset():
         
         prediction = pipe(sample.copy(), batch_size=8)
         
-        text_list : list[str] = propositionizer(
+        print(label)
+        text_list : list[str] = propositioner_llama(
             label, 
             "", 
-            prediction["text"],
-            model,
-            tokenizer,
-            device)
+            prediction["text"]
+        )
         
-        for idx, text in enumerate(text_list):
+        for text in text_list:
             data : dict = {
-               "text": text,
+                "text": text,
                 "label": label,
                 "id": id, 
             }
-            if not(os.path.exists(DATASETS_PATH + "youtube/text/{}/".format(label))):
-                os.mkdir(DATASETS_PATH + "youtube/text/{}/".format(label))
-            
-            with open(DATASETS_PATH + "youtube/text/{}/{}-{}.json".format(label, id, idx), "w") as f:
+            if not(os.path.exists(DATASETS_PATH + "youtube/text/all-champs.jsonl")):
+                option = "w"
+            else:
+                option = "a+"
+            with open(DATASETS_PATH + "youtube/text/all-champs.jsonl", option) as f:
                 json.dump(data, f)
+                f.write("\n")
