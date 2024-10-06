@@ -36,25 +36,5 @@ if __name__ == "__main__":
     elif args_data["word_embedding"] == "BERT":
         create_bert_word_embedding()
         
-    elif args_data["word_embedding"] == "Word2Vec":
-        vocab : list = list()
-        wv : KeyedVectors = None
-        if args_data["load_word_embedding"] == None:
-            (vocab, wv) = create_word2vec_word_embedding()
-            wv.save_word2vec_format("./models/w2v/w2v_{}.kv".format(uuid.uuid4()))
-        else:
-            wv = KeyedVectors.load_word2vec_format("./models/w2v/w2v_{}.kv".format(args_data["load_word_embedding"]))
         
-        # Getting champion list
-        champion_names : list[str] = list()
-        with open("./datasets/champion_mapping.json", "r") as file:
-            champion_mapping : dict = json.load(file)
-            champion_names = [s.lower() for s in list(champion_mapping.keys())]
-        
-        print("Most similar words for orianna:")
-        for w, sim in wv.most_similar(positive=["orianna"]):
-            print((w, sim))
-        
-        print("\n------\n")
-        
-        
+    
