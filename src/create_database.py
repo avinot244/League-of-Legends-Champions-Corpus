@@ -185,21 +185,7 @@ def create_mobalytics_dataset(
                 with open(DATASETS_PATH + f"{db_type}/{db_name}.jsonl", "w") as f:
                     for line in lines:
                         f.write(json.dumps(line) + "\n")
-        
-        # db_size = len(lines)
-        # train_size = round(db_size * 0.80)
 
-        # np.random.shuffle(lines)
-        # train_data = lines[:train_size]
-        # test_data = lines[train_size + 1:]
-
-        # with open(DATASETS_PATH + "{}/train-{}.jsonl".format(db_type, db_name), "w") as f:
-        #     for line in train_data:
-        #         f.write(json.dumps(line) + "\n")
-
-        # with open(DATASETS_PATH + "{}/test-{}.jsonl".format(db_type, db_name), "w") as f:
-        #     for line in test_data:
-        #         f.write(json.dumps(line) + "\n")
 
 def get_mp3_files():
     # https://youtube.com/playlist?list=PLHdLJeeTQbtIrtOwvmJcO6XkKK5KKp18T&si=lDKE3JfRxGRBVE69
@@ -234,7 +220,6 @@ def create_youtube_dataset():
         
         prediction = pipe(sample.copy(), batch_size=8)
         
-        print(label)
         text_list : list[str] = propositioner_llama(
             label, 
             "", 
@@ -245,7 +230,7 @@ def create_youtube_dataset():
             data : dict = {
                 "text": text,
                 "label": label,
-                "id": id, 
+                "id": id
             }
             if not(os.path.exists(DATASETS_PATH + "youtube/text/all-champs.jsonl")):
                 option = "w"
