@@ -1,6 +1,5 @@
 import torch
-from transformers import AutoModelForMaskedLM, AutoTokenizer, DataCollatorForLanguageModeling, default_data_collator, TrainingArguments, Trainer
-import torch
+from transformers import AutoModelForMaskedLM, AutoTokenizer, DataCollatorForLanguageModeling, default_data_collator, TrainingArguments, Trainer, pipeline
 from datasets import load_dataset
 import collections
 import numpy as np
@@ -8,6 +7,8 @@ import math
 
 # source : https://huggingface.co/learn/nlp-course/chapter7/3
 
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 ### Loading model
 model_checkpoint = "distilbert-base-uncased"
 model = AutoModelForMaskedLM.from_pretrained(model_checkpoint)
@@ -155,7 +156,8 @@ training_args = TrainingArguments(
     push_to_hub=True,
     fp16=False,
     logging_steps=logging_steps,
-    hub_token="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"
+    hub_token="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",
+    num_train_epochs=15
 )
 
 trainer = Trainer(
@@ -172,21 +174,19 @@ eval_results = trainer.evaluate()
 print(f">>> Perplexity: {math.exp(eval_results['eval_loss']):.2f}")
 
 trainer.train()
+trainer.push_to_hub()
 
 
 ### Results
-eval_results = trainer.evaluate()
-print(f">>> Perplexity: {math.exp(eval_results['eval_loss']):.2f}")
+mask_filler = pipeline(
+    "fill-mask", model="distilbert-lolchamps"
+)
 
-test_text = "Aatrox has a [MASK] early game"
+test_text = "Nautilus is good at [MASK] into the enemy composition."
 
-inputs = tokenizer(test_text, return_tensors="pt")
-token_logits = model(**inputs).logits
-# Find the location of [MASK] and extract its logits
-mask_token_index = torch.where(inputs["input_ids"] == tokenizer.mask_token_id)[1]
-mask_token_logits = token_logits[0, mask_token_index, :]
-# Pick the [MASK] candidates with the highest logits
-top_5_tokens = torch.topk(mask_token_logits, 5, dim=1).indices[0].tolist()
-
-for token in top_5_tokens:
-    print(f"'>>> {test_text.replace(tokenizer.mask_token, tokenizer.decode([token]))}'")
+preds = mask_filler(test_text)
+print(test_text)
+for pred in preds:
+    # print(pred)
+    # print(f">>> {pred['sequence']} ")
+    print(f">>> {pred['sequence']} {pred['score']}")
