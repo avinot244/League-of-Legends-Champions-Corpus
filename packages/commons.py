@@ -6,7 +6,7 @@ from transformers import logging
 import json
 import ollama
 
-from .utils.globals import PROMPT_PROPOSITIONIZER
+from .utils.globals import PROMPT_PROPOSITIONIZER, PROMPT_PROPOSITIONIZER_V2
 
 def token_length(word : str, tokenizer):
     return len(tokenizer.tokenize(word))
@@ -49,7 +49,7 @@ def propositionizer(
             res += prop_list
         except:
             prop_list = []
-            # print("[ERROR] Failed to parse output text as JSON.")
+            print("[ERROR] Failed to parse output text as JSON.")
         
         
     return res
@@ -67,7 +67,7 @@ def propositioner_llama(
     chat_history : list[dict] = list()
     chat_history.append({
         "role": "system",
-        "content": PROMPT_PROPOSITIONIZER
+        "content": PROMPT_PROPOSITIONIZER_V2
     })
 
     chat_history.append({

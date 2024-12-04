@@ -2,7 +2,7 @@ import os
 import json
 
 
-with open("./datasets/fill-mask/lol-champs.jsonl", "r") as f:
+with open("./datasets/youtube/text/all-champs.jsonl", "r") as f:
     i : int = 0
     j : int = 2
     
@@ -18,14 +18,14 @@ with open("./datasets/fill-mask/lol-champs.jsonl", "r") as f:
         
         if line_1["label"] == line_2["label"]:
             champ_data : dict = {
-                "label": line_1["label"],
+                "label": line_1["label"].lower(),
                 "text": line_1["text"] + " " + line_2["text"]
             }
-            with open("./datasets/fill-mask/lol-champs-fused.jsonl", "a") as o:
+            with open("./datasets/youtube/text/all-champs-fused.jsonl", "a") as o:
                 json.dump(champ_data, o)
                 o.write("\n")
         else:
-            with open("./datasets/fill-mask/lol-champs-fused.jsonl", "a") as o:
+            with open("./datasets/youtube/text/all-champs-fused.jsonl", "a") as o:
                 json.dump(line_1, o)
                 o.write("\n")
                 json.dump(line_2, o)
