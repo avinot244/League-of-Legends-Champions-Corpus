@@ -3,6 +3,7 @@ import datasets
 import os
 import uuid
 import json
+from tqdm import tqdm
 
 from packages.utils.globals import DATASETS_PATH
 from packages.utils.utils_func import get_token
@@ -20,10 +21,11 @@ def push_audio_dataset():
         "id": []
     }
     for root, dirs, files in os.walk(DATASETS_PATH + "youtube/audio/"):
-        for name in files:
+        name : str
+        for name in tqdm(files):
             label : str = ""
             for champion in champion_list:
-                if champion in name:
+                if champion in name.lower():
                     label = champion
                     
             if label == "":
