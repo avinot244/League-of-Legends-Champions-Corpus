@@ -4,3 +4,4 @@ datasets/
 *.pyc
 ./packages/__pycache__
 models/
+env/
