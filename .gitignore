@@ -5,3 +5,4 @@ datasets/
 ./packages/__pycache__
 models/
 env/
+test.py
