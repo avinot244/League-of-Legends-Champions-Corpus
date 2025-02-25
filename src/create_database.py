@@ -19,6 +19,7 @@ from tqdm import tqdm
 import numpy as np
 import torch
 import os
+import re
 
 def create_line(
     title : str, 
@@ -100,7 +101,6 @@ def create_mobalytics_dataset(
 
             
             for pwData, snwData, champMUData, champRoleData in zip(powerSpikesDataList, snwDataList, champMU, champRole):
-                # print("Counter match up tips")
                 # For counter match up tips
                 champRoleDataList : list = champRoleData["flatData"]["counterTips"]
                 for counterTips in champRoleDataList:
@@ -117,7 +117,6 @@ def create_mobalytics_dataset(
                     )
                 
                 # For champMU data
-                # print("Match up")
                 lines = create_line(
                     champion_name, 
                     champMUData["flatData"]["matchupTips"], 
@@ -130,7 +129,6 @@ def create_mobalytics_dataset(
                     device
                 )
 
-                # print("Strenghts and weaknesses")
                 # For Strenght and weaknesses
                 lines = create_line(
                     champion_name, 
@@ -155,7 +153,6 @@ def create_mobalytics_dataset(
                     device
                 )
                 
-                # print("Power Spikes")
                 # For Power spikes
                 pwGameStages = pwData["flatData"]["gameStages"]
                 for pwGS in pwGameStages:
@@ -195,40 +192,68 @@ def get_mp3_files():
     for url in url_list:
         download_audio(url, DATASETS_PATH + "/youtube")
 
+def labelize(text : str, label : str):
+    replacements = {
+        r"\bhe\b": f"{label}",
+        r"\bshe\b": f"{label}",
+        r"\byou\b": f"{label}",
+        r"\bhis\b": f"{label}'s",
+        r"\bher\b": f"{label}'s"
+    }
+    
+    for key, value in replacements.items():
+        text = re.sub(key, value, text, flags=re.IGNORECASE)
+    
+    return text
+
 def create_youtube_dataset():
+    # Set logging verbosity
     transformers.logging.set_verbosity_error()
     hf_read = get_token("read")
-    
-    
+
+    # Set device
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    
+
+    # Initialize the pipeline
     pipe = pipeline(
         "automatic-speech-recognition",
         model="openai/whisper-small",
         chunk_length_s=30,
         device=device
     )
-    
+
+    # Load the dataset
     ds = load_dataset("avinot/LoL-Champion-Guides-audio", token=hf_read, split="train")
-    
+
+    # Load the tokenizer
+    model_name = "meta-llama/Llama-3.2-3B"
+    tokenizer = AutoTokenizer.from_pretrained(model_name, token=hf_read)
+    tokenizer.pad_token = tokenizer.eos_token
+
+    # Get a sample from the dataset
     for line in tqdm(ds, position=0):
         sample = line["audio"]
         label = line["label"]
         id = line["id"]
-        
-        
-        
+
+        # Transcribe the audio sample
         prediction = pipe(sample.copy(), batch_size=8)
-        
-        text_list : list[str] = propositioner_llama(
-            label, 
-            "", 
-            prediction["text"]
-        )
-        
-        for text in text_list:
+        transcribed_text = prediction["text"]
+
+        # Tokenize the transcribed text
+        tokens = tokenizer(transcribed_text, return_tensors="pt", truncation=False)
+        input_ids = tokens["input_ids"][0]
+
+        # Split the tokens into chunks of 512 tokens with an overlap of 100 tokens
+        chunk_size = 512
+        overlap = 100
+        token_chunks = [input_ids[i:i + chunk_size] for i in range(0, len(input_ids), chunk_size - overlap)]
+
+        # Decode each chunk back to text
+        chunk_texts = [labelize(tokenizer.decode(chunk, skip_special_tokens=True), label) for chunk in token_chunks]
+        for chunk_text in chunk_texts:
             data : dict = {
-                "text": text,
+                "text": chunk_text,
                 "label": label,
                 "id": id
             }
@@ -239,3 +264,10 @@ def create_youtube_dataset():
             with open(DATASETS_PATH + "youtube/text/all-champs.jsonl", option) as f:
                 json.dump(data, f)
                 f.write("\n")
+
+        # # Print the chunks
+        # for i, chunk_text in enumerate(chunk_texts):
+        #     print(f"Chunk {i + 1}:")
+        #     print(chunk_text)
+        #     print("\n" + "-"*50 + "\n")
+                

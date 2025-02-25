@@ -25,8 +25,8 @@ def push_audio_dataset():
         for name in tqdm(files):
             label : str = ""
             for champion in champion_list:
-                if champion in name.lower():
-                    label = champion
+                if champion.lower() in name.lower():
+                    label = champion.lower()
                     
             if label == "":
                 label = "guide"
