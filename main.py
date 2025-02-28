@@ -1,4 +1,4 @@
-from src.create_database import create_mobalytics_dataset, create_youtube_dataset
+from src.create_database import create_mobalytics_dataset, create_youtube_dataset, regenerate_error_lines
 from src.create_word_embedding import create_bert_word_embedding, create_word2vec_word_embedding
 from packages.db_manager.youtube.youtube_data import push_audio_dataset
 
@@ -29,6 +29,7 @@ if __name__ == "__main__":
     elif args_data["create_db_youtube"]:
         # push_audio_dataset()
         create_youtube_dataset()
+        regenerate_error_lines()
     
     elif args_data["push_db_youtube"]:
         push_audio_dataset()

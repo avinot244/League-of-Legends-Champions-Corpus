@@ -27,6 +27,7 @@ def split_text(text : str, tokenizer : AutoTokenizer, max_length : int = 350):
     return res
 
 def propositionizer(
+    id : str,
     title : str, 
     section : str, 
     content : str, 
@@ -49,7 +50,14 @@ def propositionizer(
             res += prop_list
         except:
             prop_list = []
-            print("[ERROR] Failed to parse output text as JSON.")
+            print(f"[ERROR] Failed to parse output text as JSON for {title} and id {id}.")
+            with open("error_propositionizer.json", "a") as f:
+                data : dict = json.load(f)
+                data["error"].append({
+                    "title": title,
+                    "id": id
+                })
+                json.dump(data, f)
         
         
     return res
@@ -58,7 +66,7 @@ def propositioner_llama(
     title : str,
     section : str,
     content : str
-) -> str: 
+) -> list[str]: 
     logging.set_verbosity_error()
 
     # Propositionizing the content
