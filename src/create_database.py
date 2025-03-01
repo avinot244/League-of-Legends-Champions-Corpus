@@ -148,9 +148,14 @@ def create_mobalytics_dataset(
             counters : dict = get_champion_counters(champion_name)
             champMU : list = counters["data"]["championMatchupSpecificData"]
             champRole : list = counters["data"]["championRoleData"]
-
             
-            for pwData, snwData, champMUData, champRoleData in zip(powerSpikesDataList, snwDataList, champMU, champRole):
+            valid_data = zip(
+                powerSpikesDataList if powerSpikesDataList is not None else [],
+                snwDataList if snwDataList is not None else [],
+                champMU if champMU is not None else [],
+                champRole if champRole is not None else []
+            )
+            for pwData, snwData, champMUData, champRoleData in valid_data:
                 # For counter match up tips
                 champRoleDataList : list = champRoleData["flatData"]["counterTips"]
                 for counterTips in champRoleDataList:
@@ -229,7 +234,7 @@ def create_mobalytics_dataset(
                         device
                     )
                 
-                with open(DATASETS_PATH + f"{db_type}/{db_name}.jsonl", "w") as f:
+                with open(DATASETS_PATH + f"{db_type}/{db_name}.jsonl", "a") as f:
                     label_chunks = {}
                     for line in lines:
                         label = line["label"]
@@ -258,6 +263,7 @@ def create_mobalytics_dataset(
                                 "label": label,
                             }
                             f.write(json.dumps(data) + "\n")
+                                
 
 
 def get_mp3_files():
