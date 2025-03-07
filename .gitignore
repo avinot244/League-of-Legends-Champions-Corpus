@@ -1,6 +1,6 @@
 token.json
 token_ytb.json
-datasets/
+data/
 *.pyc
 ./packages/__pycache__
 env/
