@@ -5,5 +5,5 @@ def scrape(url : str):
     token = get_token("read", "firecrawl")
     app = FirecrawlApp(api_key=token)
     
-    scrape_result = app.scrape_url('firecrawl.dev', params={'formats': ['markdown']})
+    scrape_result = app.scrape_url('https://wiki.leagueoflegends.com/en-us/Thresh', params={'formats': ['markdown']})
     return scrape_result["markdown"]
