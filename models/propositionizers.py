@@ -1,12 +1,11 @@
 from transformers import AutoTokenizer
 from transformers.models.t5.modeling_t5 import T5ForConditionalGeneration
 from transformers.models.t5.tokenization_t5_fast import T5TokenizerFast
-from transformers.pipelines.text2text_generation import TranslationPipeline
 from transformers import logging
 import json
 import ollama
 
-from .utils.globals import PROMPT_PROPOSITIONIZER, PROMPT_PROPOSITIONIZER_V2
+from packages.globals import PROMPT_PROPOSITIONIZER_V2
 
 def token_length(word : str, tokenizer):
     return len(tokenizer.tokenize(word))

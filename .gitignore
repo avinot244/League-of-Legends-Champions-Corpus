@@ -3,6 +3,5 @@ token_ytb.json
 datasets/
 *.pyc
 ./packages/__pycache__
-models/
 env/
 test.py

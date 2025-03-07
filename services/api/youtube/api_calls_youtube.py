@@ -5,7 +5,7 @@ from googleapiclient.discovery import build
 from urllib.parse import urlparse, parse_qs
 import yt_dlp
 
-from packages.utils.globals import DATASETS_PATH
+from packages.globals import DATASETS_PATH
 
 
 def get_token():

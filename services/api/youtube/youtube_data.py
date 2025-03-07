@@ -5,8 +5,8 @@ import uuid
 import json
 from tqdm import tqdm
 
-from packages.utils.globals import DATASETS_PATH
-from packages.utils.utils_func import get_token
+from packages.globals import DATASETS_PATH
+from packages.utils_func import get_token
 
 
 
