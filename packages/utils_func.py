@@ -1,5 +1,6 @@
 import json
 import re
+from typing import Literal
 
 def saveToJson(data_dict : dict, json_path : str):
     with open(json_path, 'r') as file:
@@ -26,7 +27,7 @@ def replace_within_double_curly_brackets(text):
 
     return text
 
-def get_token(option : str):
+def get_token(option : Literal["read", "write"], type : Literal["firecrawl", "hf", "ytb"]):
     with open("./datasets/token.json", "r") as f:
         res = json.load(f)
         if option == "read":

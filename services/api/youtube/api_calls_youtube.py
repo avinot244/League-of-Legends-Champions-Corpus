@@ -1,20 +1,11 @@
-import requests
-import os
-import json
 from googleapiclient.discovery import build
 from urllib.parse import urlparse, parse_qs
 import yt_dlp
+from packages.utils_func import get_token
 
-from packages.globals import DATASETS_PATH
-
-
-def get_token():
-    with open(DATASETS_PATH + "token_ytb.json", "r") as f:
-        token_dict : dict = json.load(f)
-        return token_dict["token"]
 
 def get_playlist_videos(playlist_id):
-    token = get_token()
+    token = get_token("read", "ytb")
     youtube = build('youtube', 'v3', developerKey=token)
     
     request = youtube.playlistItems().list(

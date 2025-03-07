@@ -12,7 +12,7 @@ from models.commons import chunk_text
 
 def regenerate_error_lines():
     transformers.logging.set_verbosity_error()
-    hf_read = get_token("read")
+    hf_read = get_token("read", "hf")
 
     # Set device
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
