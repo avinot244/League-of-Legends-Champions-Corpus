@@ -106,9 +106,6 @@ def create_mobalytics_database(
                         lines, 
                         pipeline_en_fr, 
                         pipeline_fr_en,
-                        model,
-                        tokenizer,
-                        device
                     )
                 
                 # For champMU data
@@ -119,9 +116,6 @@ def create_mobalytics_database(
                     lines, 
                     pipeline_en_fr, 
                     pipeline_fr_en,
-                    model,
-                    tokenizer,
-                    device
                 )
 
                 # For Strenght and weaknesses
@@ -131,10 +125,7 @@ def create_mobalytics_database(
                     db_type, 
                     lines, 
                     pipeline_en_fr, 
-                    pipeline_fr_en,
-                    model,
-                    tokenizer,
-                    device
+                    pipeline_fr_en
                 )
                 lines = create_line(
                     champion_name, 
@@ -142,10 +133,7 @@ def create_mobalytics_database(
                     db_type, 
                     lines, 
                     pipeline_en_fr, 
-                    pipeline_fr_en,
-                    model,
-                    tokenizer,
-                    device
+                    pipeline_fr_en
                 )
                 
                 # For Power spikes
@@ -157,10 +145,7 @@ def create_mobalytics_database(
                         db_type, 
                         lines, 
                         pipeline_en_fr, 
-                        pipeline_fr_en,
-                        model,
-                        tokenizer,
-                        device
+                        pipeline_fr_en
                     )
                     lines = create_line(
                         champion_name, 
@@ -168,10 +153,7 @@ def create_mobalytics_database(
                         db_type, 
                         lines, 
                         pipeline_en_fr, 
-                        pipeline_fr_en,
-                        model,
-                        tokenizer,
-                        device
+                        pipeline_fr_en
                     )
                 
                 with open(DATASETS_PATH + f"{db_type}/{db_name}.jsonl", "a") as f:

@@ -1,4 +1,4 @@
-DATASETS_PATH = "./datasets/"
+DATASETS_PATH = "./data/"
 DB_TYPES = ["fill-mask", "semantic-similarity", "w2v"]
 PROMPT_PROPOSITIONIZER = """
 Decompose the "Content" into clear and simple propositions, ensuring they are interpretable out of
