@@ -1,4 +1,4 @@
-from services.create_database import create_mobalytics_database, create_youtube_database
+from services.create_database import create_mobalytics_database, create_youtube_database, create_wiki_database
 from services.api.youtube.youtube_data import push_audio_dataset
 from services.utils import regenerate_error_lines
 
@@ -8,6 +8,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--create-db-mobalytics", action="store_true", default=False, help="Create database from mobalytics")
     parser.add_argument("--create-db-youtube", action="store_true", default=False, help="Create database from youtube")
+    parser.add_argument("--create-db-wiki", action="store_true", default=False, help="Create database from the league of legends wiki")
     parser.add_argument("--push-db-youtube", action="store_true", default=False, help="Putsh to HF dataset from youtube")
     parser.add_argument("--db-type", metavar="[str]", type=str, help="Tells wich type of database you want to create")
     parser.add_argument("--db-name", metavar="[str]", type=str, help="Name of database")
@@ -26,6 +27,9 @@ if __name__ == "__main__":
         # push_audio_dataset()
         create_youtube_database()
         regenerate_error_lines()
+    
+    elif args_data["create_db_wiki"]:
+        create_wiki_database("extract", False)
     
     elif args_data["push_db_youtube"]:
         push_audio_dataset()

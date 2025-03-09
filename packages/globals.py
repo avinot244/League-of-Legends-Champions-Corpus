@@ -1,4 +1,5 @@
 DATASETS_PATH = "./data/"
+LOL_WIKI_URL = "https://wiki.leagueoflegends.com/en-us/"
 DB_TYPES = ["fill-mask", "semantic-similarity", "w2v"]
 PROMPT_PROPOSITIONIZER = """
 Decompose the "Content" into clear and simple propositions, ensuring they are interpretable out of
