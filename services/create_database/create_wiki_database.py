@@ -2,6 +2,7 @@ from typing import Literal
 import json
 from services.api.firecrawl.api_calls_firecrawl import scrape, extract
 from tqdm import tqdm
+import time
 
 from packages.globals import DATASETS_PATH, LOL_WIKI_URL
 
@@ -13,7 +14,7 @@ def create_wiki_database(mode : Literal["scrape", "extract"], error_mode : bool 
         with open(f"{DATASETS_PATH}/champion_mapping.json", "r") as f:
             champion_list = json.load(f)
     else:
-        with open(f"./error_fircrawl.json", "r") as f:
+        with open(f"./error_firecrawl.json", "r") as f:
             champion_list = json.load(f)
     
     all_data : list[dict] = list()
@@ -28,8 +29,9 @@ def create_wiki_database(mode : Literal["scrape", "extract"], error_mode : bool 
             all_data.append(result)
             with open(f"{DATASETS_PATH}/wiki_data.json", "w") as o:
                 json.dump(all_data, o, indent=4)
-
+            time.sleep(6)
         except Exception as e:
+            tqdm.write(e)
             error_list.append(champion)
             with open("./error_firecrawl.json", "w") as o:
                 json.dump(error_list, o, indent=4)

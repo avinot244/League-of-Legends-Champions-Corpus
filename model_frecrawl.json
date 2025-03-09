@@ -1,0 +1,42 @@
+{
+	"type": "object",
+	"properties": {
+		"champion_characteristics": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"role": {
+					"type": "string"
+				},
+				"abilities": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"ability_name": {
+								"type": "string"
+							},
+							"description": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"ability_name",
+							"description"
+						]
+					}
+				}
+			},
+			"required": [
+				"name",
+				"role",
+				"abilities"
+			]
+		}
+	},
+	"required": [
+		"champion_characteristics"
+	]
+}
