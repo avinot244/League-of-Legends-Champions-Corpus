@@ -1,28 +1,20 @@
 from firecrawl import FirecrawlApp
-from pydantic import BaseModel, Field
-from packages.utils_func import get_token
-
 import json
+from pydantic import BaseModel
 
-def get_schema() -> dict:
-    data : dict = dict
-    with open("./model_firecrawl.json", "r") as f:
-        data = json.load(f)
-        
-    return data
+from packages.utils_func import get_token
+from services.api.firecrawl.model_provider import model_provider
 
 def extract(url : str):
     token = get_token("read", "firecrawl")
     app = FirecrawlApp(api_key=token)
     
-    data = app.scrape_url(url, {
-        'formats': ["json"],
-        'jsonOptions': {
-            'schema': get_schema()
-        }
+    model = model_provider(url)    
+    data = app.extract([url], {
+        "schema": model.model_json_schema()
     })
     
-    return data["json"]
+    return data["data"]
     
 
 def scrape(url : str):
