@@ -1,6 +1,7 @@
-from services.api.firecrawl.models.ChampionModel import ChampionModel
-from services.api.firecrawl.models.MainRuneModel import MainRuneModel
+from services.api.firecrawl.models.ChampionModel import ChampionModelWrapper
+from services.api.firecrawl.models.MainRuneModel import MainRuneModelWrapper
 from services.api.firecrawl.models.MainTreeRuneModel import MainTreeRuneModel
-from services.api.firecrawl.models.SubRuneModel import SubRuneModel
+from services.api.firecrawl.models.SubRuneModel import SubRuneModelWrapper
+from services.api.firecrawl.models.MonsterModel import MonsterModelWrapper
 
-__all__ = ['ChampionModel', 'MainTreeRuneModel', 'MainRuneModel', 'SubRuneModel']
+__all__ = ['ChampionModelWrapper', 'MainTreeRuneModel', 'MainRuneModelWrapper', 'SubRuneModelWrapper', 'MonsterModelWrapper']

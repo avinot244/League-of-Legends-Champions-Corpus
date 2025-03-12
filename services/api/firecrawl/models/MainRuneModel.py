@@ -1,9 +1,12 @@
 from pydantic import BaseModel    
-
-class Rune(BaseModel):
-    name: str
-    all_effects_description: str
-    all_notes: list[str]
+from dataclasses import dataclass
 
 class MainRuneModel(BaseModel):
-    runes: list[Rune]
+    global_name: str
+    description: list[str]
+    notes: str
+
+@dataclass
+class MainRuneModelWrapper:
+    model: dict = MainRuneModel.model_json_schema()
+    prompt: str = "Extract the global name, the detailed descriptions and the notes. Replace the links by their replacement texts. Format the extracted text in markdown."

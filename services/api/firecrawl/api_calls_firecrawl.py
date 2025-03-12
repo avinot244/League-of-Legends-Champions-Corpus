@@ -1,6 +1,4 @@
 from firecrawl import FirecrawlApp
-import json
-from pydantic import BaseModel
 
 from packages.utils_func import get_token
 from services.api.firecrawl.model_provider import model_provider
@@ -11,7 +9,8 @@ def extract(url : str):
     
     model = model_provider(url)    
     data = app.extract([url], {
-        "schema": model.model_json_schema()
+        "schema": model.model,
+        "prompt": model.prompt
     })
     
     return data["data"]
