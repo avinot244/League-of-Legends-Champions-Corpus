@@ -3,7 +3,6 @@ from services.api.firecrawl.models.MainRuneModel import MainRuneModelWrapper
 from services.api.firecrawl.models.MainTreeRuneModel import MainTreeRuneModel
 from services.api.firecrawl.models.SubRuneModel import SubRuneModelWrapper
 from services.api.firecrawl.models.MonsterModel import MonsterModelWrapper
-
 from services.api.firecrawl.models.AtakhanTypeModel import AtakhanTypeModelWrapper
 from services.api.firecrawl.models.DragonTypeModel import DragonTypeModelWrapper
 from services.api.firecrawl.models.JungleCampModel import JungleCampModelWrapper
