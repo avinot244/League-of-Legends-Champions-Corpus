@@ -18,6 +18,7 @@ def extract_data(data_type : Literal["champions", "game_mechanics", "items", "ru
         with open(f"{DATASETS_PATH}/lol-wiki-urls/{data_type}.json", "r") as f:
             url_list = json.load(f)
     
+    print(f"Extracting data for {data_type}")
     for url in tqdm(url_list):
         try :
             result = extract(url)
