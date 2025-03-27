@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 class MinionWaves(BaseModel):
     description: str
@@ -36,6 +36,6 @@ class MinionTypeModel(BaseModel):
     
 @dataclass
 class MinionTypeModelWrapper:
-    model: dict = MinionTypeModel.model_json_schema()
+    model: dict = field(default_factory=lambda: MinionTypeModel.model_json_schema())
     prompt: str =  "Extract all the page textual content except for the navigation menus. Replace any links by their corresponding replacement text"
     

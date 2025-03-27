@@ -13,6 +13,6 @@ from services.api.firecrawl.models.RiftHeralTypeModel import RiftHeraldTypeModel
 from services.api.firecrawl.models.RiftScuttleTypeModel import RiftScuttleTypeModelWrapper
 from services.api.firecrawl.models.SummonerSpellModel import SummonerSpellModelWrapper
 from services.api.firecrawl.models.VoidGrubTypeModel import VoidGrubTypeModelWrapper
+from services.api.firecrawl.models.ItempModel import ItemModelWrapper
 
-
-__all__ = ['ChampionModelWrapper', 'MainTreeRuneModel', 'MainRuneModelWrapper', 'SubRuneModelWrapper', 'MonsterModelWrapper', 'AtakhanTypeModelWrapper', 'DragonTypeModelWrapper', 'JungleCampModelWrapper', 'MainSummonerSpellModelWrapper', 'MinionTypeModelWrapper', 'NashorTypeModelWrapper', 'RiftHeraldTypeModelWrapper', 'RiftScuttleTypeModelWrapper', 'SummonerSpellModelWrapper', 'VoidGrubTypeModelWrapper']
+__all__ = ['ChampionModelWrapper', 'MainTreeRuneModel', 'MainRuneModelWrapper', 'SubRuneModelWrapper', 'MonsterModelWrapper', 'AtakhanTypeModelWrapper', 'DragonTypeModelWrapper', 'JungleCampModelWrapper', 'MainSummonerSpellModelWrapper', 'MinionTypeModelWrapper', 'NashorTypeModelWrapper', 'RiftHeraldTypeModelWrapper', 'RiftScuttleTypeModelWrapper', 'SummonerSpellModelWrapper', 'VoidGrubTypeModelWrapper', 'ItemModelWrapper']

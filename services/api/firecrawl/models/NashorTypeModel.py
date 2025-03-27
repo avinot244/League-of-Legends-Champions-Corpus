@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 class Passives(BaseModel):
     description: str
@@ -24,5 +24,5 @@ class NashorTypeModel(BaseModel):
 
 @dataclass
 class NashorTypeModelWrapper:
-    model: dict = NashorTypeModel.model_json_schema()
+    model: dict = field(default_factory=lambda: NashorTypeModel.model_json_schema())
     prompt: str = "Extract the general description, all spawn content, all passives content, all basic attacks content, all abilities content and all strategies. Replace any links with their corresponding replacement texts."

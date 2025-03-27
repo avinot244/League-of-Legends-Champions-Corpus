@@ -4,7 +4,7 @@ from services.api.firecrawl.api_calls_firecrawl import scrape, extract
 from tqdm import tqdm
 import time
 
-from packages.globals import DATASETS_PATH, LOL_WIKI_URL
+from packages.globals import DATASETS_PATH
 
 def extract_data(data_type : Literal["champions", "game_mechanics", "items", "runes", "summonner_spells"], error_mode : bool = False):
     all_data : list[dict] = list()
@@ -15,7 +15,7 @@ def extract_data(data_type : Literal["champions", "game_mechanics", "items", "ru
             error_list = json.load(f)
         url_list = error_list
     else:
-        with open(f"{DATASETS_PATH}/lol-wiki-urls/{data_type}.json", "r") as f:
+        with open(f"{DATASETS_PATH}/lol-wiki-urls/data/{data_type}.json", "r") as f:
             url_list = json.load(f)
     
     for url in tqdm(url_list):

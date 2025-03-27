@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 class MainSummonerSpellModel(BaseModel):
     general_description: str
@@ -9,6 +9,6 @@ class MainSummonerSpellModel(BaseModel):
     
 @dataclass
 class MainSummonerSpellModelWrapper:
-    model: dict = MainSummonerSpellModel.model_json_schema()
+    model: dict = field(default_factory=lambda: MainSummonerSpellModel.model_json_schema())
     prompt: str = "Extract the general description, list of standard summoner spells, all variants, and cooldown reducing effects. Replace any kinks by their replacement text."
     
