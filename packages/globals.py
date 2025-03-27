@@ -1,4 +1,4 @@
-DATASETS_PATH = "./data/"
+DATASETS_PATH = "./data"
 LOL_WIKI_URL = "https://wiki.leagueoflegends.com/en-us/"
 DB_TYPES = ["fill-mask", "semantic-similarity", "w2v"]
 PROMPT_PROPOSITIONIZER = """

@@ -7,7 +7,7 @@ def extract(url : str):
     token = get_token("read", "firecrawl")
     app = FirecrawlApp(api_key=token)
     
-    model = model_provider(url)    
+    model = model_provider(url)
     data = app.extract([url], {
         "schema": model.model,
         "prompt": model.prompt

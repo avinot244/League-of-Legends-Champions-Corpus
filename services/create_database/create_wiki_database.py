@@ -15,14 +15,14 @@ def extract_data(data_type : Literal["champions", "game_mechanics", "items", "ru
             error_list = json.load(f)
         url_list = error_list
     else:
-        with open(f"{DATASETS_PATH}/lol-wiki-urls/data/{data_type}.json", "r") as f:
+        with open(f"{DATASETS_PATH}/lol-wiki-urls/{data_type}.json", "r") as f:
             url_list = json.load(f)
     
     for url in tqdm(url_list):
         try :
             result = extract(url)
             all_data.append(result)
-            with open(f"{DATASETS_PATH}/wiki_data_{data_type}.json", "w") as o:
+            with open(f"{DATASETS_PATH}/wiki/wiki_data_{data_type}.json", "w") as o:
                 json.dump(all_data, o, indent=4)
             time.sleep(6)
         except Exception as e:

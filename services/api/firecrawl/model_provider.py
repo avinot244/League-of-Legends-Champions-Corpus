@@ -8,35 +8,37 @@ def model_provider(url : str) -> Union[ChampionModelWrapper, MainRuneModelWrappe
     data_value : str = url.split("/")[-1]
     
     if data_value in get_args(champions):
-        return ChampionModelWrapper
+        return ChampionModelWrapper()
     if data_value in get_args(main_tree_rune):
-        return MainTreeRuneModel
+        return MainTreeRuneModel()
     if data_value in get_args(main_rune):
-        return MainRuneModelWrapper
+        return MainRuneModelWrapper()
     if data_value in get_args(sub_rune):
-        return SubRuneModelWrapper
+        return SubRuneModelWrapper()
     if data_value in get_args(dragon_types):
-        return DragonTypeModelWrapper
+        return DragonTypeModelWrapper()
     if data_value in get_args(jungle_camps_types):
-        return JungleCampModelWrapper
+        return JungleCampModelWrapper()
     if data_value == "Baron_Nashor":
-        return NashorTypeModelWrapper
+        return NashorTypeModelWrapper()
     if data_value == "Atakhan":
-        return AtakhanTypeModelWrapper
+        return AtakhanTypeModelWrapper()
     if data_value == "Monster":
-        return MonsterModelWrapper
+        return MonsterModelWrapper()
     if data_value == "Voidgrub_camp":
-        return VoidGrubTypeModelWrapper
+        return VoidGrubTypeModelWrapper()
     if data_value == "Rift_Scuttler_camp":
-        return RiftScuttleTypeModelWrapper
+        return RiftScuttleTypeModelWrapper()
     if data_value == "Minion":
-        return MinionTypeModelWrapper
+        return MinionTypeModelWrapper()
     if data_value == "Rift_Herald":
-        return RiftHeraldTypeModelWrapper
+        return RiftHeraldTypeModelWrapper()
     if data_value == "Summoner_spell":
-        return MainSummonerSpellModelWrapper
+        return MainSummonerSpellModelWrapper()
     if data_value in summoner_type:
-        return SummonerSpellModelWrapper
+        return SummonerSpellModelWrapper()
+    if data_value in get_args(item_types):
+        return ItemModelWrapper()
     
     else:
         return Exception(f"Element {data_value} not supported")
