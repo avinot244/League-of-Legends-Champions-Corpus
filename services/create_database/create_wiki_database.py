@@ -27,7 +27,6 @@ def extract_data(data_type : Literal["champions", "game_mechanics", "items", "ru
                 json.dump(all_data, o, indent=4)
             time.sleep(6)
         except Exception as e:
-            tqdm.write(e)
             error_list.append(url)
             with open("./error_firecrawl.json", "w") as o:
                 json.dump(error_list, o, indent=4)
