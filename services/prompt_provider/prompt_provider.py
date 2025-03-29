@@ -12,11 +12,14 @@ def get_prompt(data_type : t_data_type):
     Returns:
         str: The corresponding prompt if found, otherwise None.
     """
-    prompts_file_path = os.path.join(os.path.dirname(__file__), './data/prompts/prompts.yml')
+    prompts_file_path = os.path.join(os.path.dirname(__file__), '../../data/prompts/prompts.yml')
     
     try:
         with open(prompts_file_path, 'r') as file:
             prompts = yaml.safe_load(file)
+        for prompt in prompts:
+            if list(prompt.keys())[0] == data_type:
+                return prompt[data_type]
         return prompts.get(data_type, None)
     except FileNotFoundError:
         raise FileNotFoundError(f"Prompts file not found at {prompts_file_path}")

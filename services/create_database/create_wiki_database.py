@@ -1,4 +1,3 @@
-from typing import Literal
 import json
 from services.api.firecrawl.api_calls_firecrawl import scrape, extract
 from tqdm import tqdm
@@ -48,8 +47,9 @@ def create_wiki_database(data_type_list : list[t_data_type], error_mode : bool =
             out_data_list : list[dict] = list()
             prompt : str = get_prompt(data_type)
             with open(f"{DATASETS_PATH}/wiki/wiki_data_{data_type}.json", "r") as f:
+                print(f"Serializing {data_type} data")
                 data : list[dict] = json.load(f)
-                for json_data in data:
+                for json_data in tqdm(data):
                     try:
                         str_data : str = ollama.chat(
                             model="json_serializer:latest",
