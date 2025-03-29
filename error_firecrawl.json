@@ -1,7 +1,11 @@
 [
-    "https://wiki.leagueoflegends.com/en-us/Precision",
-    "https://wiki.leagueoflegends.com/en-us/Legend:_Alacrity",
-    "https://wiki.leagueoflegends.com/en-us/Legend:_Haste",
-    "https://wiki.leagueoflegends.com/en-us/Legend:_Bloodline",
-    "https://wiki.leagueoflegends.com/en-us/Domination"
+    "https://wiki.leagueoflegends.com/en-us/Heal",
+    "https://wiki.leagueoflegends.com/en-us/Ghost",
+    "https://wiki.leagueoflegends.com/en-us/Barrier",
+    "https://wiki.leagueoflegends.com/en-us/Exhaust",
+    "https://wiki.leagueoflegends.com/en-us/Flash",
+    "https://wiki.leagueoflegends.com/en-us/Teleport",
+    "https://wiki.leagueoflegends.com/en-us/Smite",
+    "https://wiki.leagueoflegends.com/en-us/Cleanse",
+    "https://wiki.leagueoflegends.com/en-us/Ignite"
 ]

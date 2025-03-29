@@ -3,6 +3,8 @@ import json
 from services.api.firecrawl.api_calls_firecrawl import scrape, extract
 from tqdm import tqdm
 import time
+import ollama
+import os
 
 from packages.globals import DATASETS_PATH
 
@@ -31,6 +33,35 @@ def extract_data(data_type : Literal["champions", "game_mechanics", "items", "ru
             with open("./error_firecrawl.json", "w") as o:
                 json.dump(error_list, o, indent=4)
 
-def create_wiki_database(error_mode : bool = False):    
+
+def create_wiki_database(error_mode : bool = False):
     for data_type in ["champions", "game_mechanics", "items", "runes", "summonner_spells"]:
-        extract_data(data_type, error_mode)
+        if not os.path.exists(f"{DATASETS_PATH}/wiki/wiki_data_{data_type}.json"):
+            extract_data(data_type, error_mode)
+        
+    for data_type in ["champions", "game_mechanics", "items", "runes", "summonner_spells"]:
+        if os.path.exists(f"{DATASETS_PATH}/wiki/wiki_data_{data_type}.json"):
+            out_data_list : list[dict] = list()
+            with open(f"{DATASETS_PATH}/wiki/wiki_data_{data_type}.json", "r") as f:
+                data : list[dict] = json.load(f)
+                for json_data in data:
+                    try:
+                        str_data : str = ollama.chat(
+                            model="json_serializer:latest",
+                            messages=[
+                                {
+                                    "role": "user",
+                                    "content": f"<json>\n{json.dumps(json_data, indent=4)}\n</json>"
+                                }
+                            ]
+                        ).message["content"].replace("$", "")
+                        out_data_list.append({
+                            "label": json_data["name"],
+                            "text": str_data
+                        })
+                        with open(f"{DATASETS_PATH}/wiki/wiki_data_str_{data_type}.json", "w") as o:
+                            json.dump(out_data_list, o, indent=4)
+                    
+                    except Exception as e:
+                        print(f"Error serializing {data_type} data: {e}")
+                        continue
