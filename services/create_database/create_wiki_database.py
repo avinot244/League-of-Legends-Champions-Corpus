@@ -7,8 +7,12 @@ import ollama
 import os
 
 from packages.globals import DATASETS_PATH
+from packages.types import t_data_type
+from services.prompt_provider.prompt_provider import get_prompt
 
-def extract_data(data_type : Literal["champions", "game_mechanics", "items", "runes", "summonner_spells"], error_mode : bool = False):
+
+
+def extract_data(data_type : t_data_type, error_mode : bool = False):
     all_data : list[dict] = list()
     url_list : list[str] = list()
     error_list : list[str] = list()
@@ -34,14 +38,15 @@ def extract_data(data_type : Literal["champions", "game_mechanics", "items", "ru
                 json.dump(error_list, o, indent=4)
 
 
-def create_wiki_database(error_mode : bool = False):
-    for data_type in ["champions", "game_mechanics", "items", "runes", "summonner_spells"]:
+def create_wiki_database(data_type_list : list[t_data_type], error_mode : bool = False ):
+    for data_type in data_type_list:
         if not os.path.exists(f"{DATASETS_PATH}/wiki/wiki_data_{data_type}.json"):
             extract_data(data_type, error_mode)
         
-    for data_type in ["champions", "game_mechanics", "items", "runes", "summonner_spells"]:
+    for data_type in data_type_list:
         if os.path.exists(f"{DATASETS_PATH}/wiki/wiki_data_{data_type}.json"):
             out_data_list : list[dict] = list()
+            prompt : str = get_prompt(data_type)
             with open(f"{DATASETS_PATH}/wiki/wiki_data_{data_type}.json", "r") as f:
                 data : list[dict] = json.load(f)
                 for json_data in data:
@@ -49,6 +54,10 @@ def create_wiki_database(error_mode : bool = False):
                         str_data : str = ollama.chat(
                             model="json_serializer:latest",
                             messages=[
+                                {
+                                    "role": "system",
+                                    "content": prompt
+                                },
                                 {
                                     "role": "user",
                                     "content": f"<json>\n{json.dumps(json_data, indent=4)}\n</json>"
