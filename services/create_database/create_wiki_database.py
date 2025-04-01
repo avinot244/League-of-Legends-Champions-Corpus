@@ -1,13 +1,15 @@
 import json
-from services.api.firecrawl.api_calls_firecrawl import scrape, extract
 from tqdm import tqdm
 import time
 import ollama
 import os
+from transformers import AutoTokenizer
 
 from packages.globals import DATASETS_PATH
+from packages.utils_func import get_token
 from packages.types import t_data_type
 from services.prompt_provider.prompt_provider import get_prompt
+from services.api.firecrawl.api_calls_firecrawl import scrape, extract
 
 
 
@@ -38,12 +40,14 @@ def extract_data(data_type : t_data_type, error_mode : bool = False):
 
 
 def create_wiki_database(data_type_list : list[t_data_type], error_mode : bool = False ):
+    # Extracting data
     for data_type in data_type_list:
         if not os.path.exists(f"{DATASETS_PATH}/wiki/wiki_data_{data_type}.json"):
             extract_data(data_type, error_mode)
-        
+    
+    # Serializing it
     for data_type in data_type_list:
-        if os.path.exists(f"{DATASETS_PATH}/wiki/wiki_data_{data_type}.json"):
+        if not os.path.exists(f"{DATASETS_PATH}/wiki/wiki_data_str_{data_type}.json"):
             out_data_list : list[dict] = list()
             prompt : str = get_prompt(data_type)
             with open(f"{DATASETS_PATH}/wiki/wiki_data_{data_type}.json", "r") as f:
@@ -75,3 +79,32 @@ def create_wiki_database(data_type_list : list[t_data_type], error_mode : bool =
                         print(e)
                         print(f"Error serializing {data_type} data: {e}")
                         continue
+                    
+    # Splitting it in fixed size of 512 tokens with a 100 tokens overlap
+    # Load the tokenizer
+    hf_read = get_token("read", "hf")
+    model_name = "meta-llama/Llama-3.2-3B"
+    tokenizer = AutoTokenizer.from_pretrained(model_name, token=hf_read)
+    tokenizer.pad_token = tokenizer.eos_token
+    
+    # Splitting the data
+    for data_type in data_type_list:
+        if not os.path.exists(f"{DATASETS_PATH}/wiki/wiki_data_chunks_{data_type}.jsonl"):
+            with open(f"{DATASETS_PATH}/wiki/wiki_data_str_{data_type}.json", "r") as f:
+                print(f"Splitting {data_type} data into chunks")
+                data = json.load(f)
+                output_file = f"{DATASETS_PATH}/wiki/wiki_data_chunks_{data_type}.jsonl"
+                with open(output_file, "w") as o:
+                    for item in tqdm(data):
+                        text = item["text"]
+                        label = item["label"]
+                        tokens = tokenizer(text, return_tensors="pt", truncation=False)["input_ids"][0]
+                        token_chunks = [
+                            tokens[i:i + 512]
+                            for i in range(0, len(tokens), 412)  # 412 ensures 100-token overlap
+                        ]
+                        for chunk in token_chunks:
+                            chunk_text = tokenizer.decode(chunk, skip_special_tokens=True)
+                            json.dump({"label": label, "text": chunk_text}, o)
+                            o.write("\n")
+    
