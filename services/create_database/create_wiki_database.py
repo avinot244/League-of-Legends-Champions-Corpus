@@ -30,7 +30,7 @@ def extract_data(data_type : t_data_type, error_mode : bool = False):
             all_data.append(result)
             with open(f"{DATASETS_PATH}/wiki/wiki_data_{data_type}.json", "w") as o:
                 json.dump(all_data, o, indent=4)
-            time.sleep(6)
+            time.sleep(1)
         except Exception as e:
             error_list.append(url)
             with open("./error_firecrawl.json", "w") as o:
@@ -72,5 +72,6 @@ def create_wiki_database(data_type_list : list[t_data_type], error_mode : bool =
                             json.dump(out_data_list, o, indent=4)
                     
                     except Exception as e:
+                        print(e)
                         print(f"Error serializing {data_type} data: {e}")
                         continue

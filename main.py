@@ -29,7 +29,7 @@ if __name__ == "__main__":
         regenerate_error_lines()
     
     elif args_data["create_db_wiki"]:
-        create_wiki_database(["champions"], False)
+        create_wiki_database(["summonner_spells"], False)
     
     elif args_data["push_db_youtube"]:
         push_audio_dataset()

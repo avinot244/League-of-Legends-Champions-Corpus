@@ -4,7 +4,7 @@ from typing import get_args, Union
 from services.api.firecrawl.models import *
 from services.api.firecrawl.types import *
 
-def model_provider(url : str) -> Union[ChampionModelWrapper, MainRuneModelWrapper, MainTreeRuneModel, SubRuneModelWrapper, MonsterModelWrapper, AtakhanTypeModelWrapper, DragonTypeModelWrapper, JungleCampModelWrapper, MainSummonerSpellModelWrapper, MinionTypeModelWrapper, NashorTypeModelWrapper, RiftHeraldTypeModelWrapper, RiftScuttleTypeModelWrapper, SummonerSpellModelWrapper, VoidGrubTypeModelWrapper]:
+def model_provider(url : str) -> Union[ChampionModelWrapper, MainRuneModelWrapper, MainTreeRuneModel, SubRuneModelWrapper, MonsterModelWrapper, AtakhanTypeModelWrapper, DragonTypeModelWrapper, JungleCampModelWrapper, MinionTypeModelWrapper, NashorTypeModelWrapper, RiftHeraldTypeModelWrapper, RiftScuttleTypeModelWrapper, SummonerSpellModelWrapper, VoidGrubTypeModelWrapper]:
     data_value : str = url.split("/")[-1]
     
     if data_value in get_args(champions):
@@ -33,9 +33,7 @@ def model_provider(url : str) -> Union[ChampionModelWrapper, MainRuneModelWrappe
         return MinionTypeModelWrapper()
     if data_value == "Rift_Herald":
         return RiftHeraldTypeModelWrapper()
-    if data_value == "Summoner_spell":
-        return MainSummonerSpellModelWrapper()
-    if data_value in summoner_type:
+    if data_value in get_args(summoner_type):
         return SummonerSpellModelWrapper()
     if data_value in get_args(item_types):
         return ItemModelWrapper()

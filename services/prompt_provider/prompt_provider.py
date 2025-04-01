@@ -20,7 +20,6 @@ def get_prompt(data_type : t_data_type):
         for prompt in prompts:
             if list(prompt.keys())[0] == data_type:
                 return prompt[data_type]
-        return prompts.get(data_type, None)
     except FileNotFoundError:
         raise FileNotFoundError(f"Prompts file not found at {prompts_file_path}")
     except yaml.YAMLError as e:
