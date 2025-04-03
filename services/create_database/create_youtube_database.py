@@ -2,11 +2,8 @@ from services.api.mobalytics.api_calls_mobalytics import *
 from packages.globals import DB_TYPES, DATASETS_PATH
 from services.api.youtube.api_calls_youtube import get_playlist_videos, get_playlist_id, download_audio
 from packages.utils_func import get_token
-from models.propositionizers import propositionizer
-from models.commons import chunk_text
+from models.commons import labelize
 
-from transformers.models.t5.modeling_t5 import T5ForConditionalGeneration
-from transformers.models.t5.tokenization_t5 import T5Tokenizer
 from transformers import AutoTokenizer
 import transformers
 from datasets import load_dataset
@@ -47,11 +44,6 @@ def create_youtube_database():
     tokenizer = AutoTokenizer.from_pretrained(model_name, token=hf_read)
     tokenizer.pad_token = tokenizer.eos_token
     
-    model_name_prop = "chentong00/propositionizer-wiki-flan-t5-large"
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    tokenizer_prop = T5Tokenizer.from_pretrained(model_name_prop)
-    model = T5ForConditionalGeneration.from_pretrained(model_name_prop).to(device)
-
     # Get a sample from the dataset
     for line in tqdm(ds, position=0):
         sample = line["audio"]
@@ -61,8 +53,23 @@ def create_youtube_database():
         # Transcribe the audio sample
         prediction = pipe(sample.copy(), batch_size=8)
         transcribed_text = prediction["text"]
-
-        # Tansform the text into propositions
-        propositions : list[str] = propositionizer(id, label, "", transcribed_text, model, tokenizer_prop, device)
-        chunk_text(propositions, label, tokenizer)
-
+        
+        # Tokenize and chunk the transcribed text with 100 tokens overlap
+        tokenized_text = tokenizer(transcribed_text, return_tensors="pt", truncation=False)["input_ids"][0]
+        chunks = []
+        overlap = 100  # Number of tokens to overlap
+        step = 512 - overlap
+        for i in range(0, len(tokenized_text), step):
+            chunks.append(tokenized_text[i:i + 512])
+        
+        # Decode each chunk back to text
+        decoded_chunks = [tokenizer.decode(chunk, skip_special_tokens=True) for chunk in chunks]
+        
+        # Labelize each chunk
+        labeled_chunks = [labelize(chunk) for chunk in decoded_chunks]
+        
+        # Save the labeled chunks to a JSONL file
+        output_path = DATASETS_PATH + "/youtube/text/all-champs.jsonl"
+        with open(output_path, "a") as f:
+            for labeled_chunk in labeled_chunks:
+                f.write(f'{{"id": "{id}", "label": "{label}", "text": "{labeled_chunk}"}}\n')
