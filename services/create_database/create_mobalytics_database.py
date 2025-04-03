@@ -1,8 +1,9 @@
-from packages.utils_func import replace_within_double_curly_brackets
+from packages.utils_func import replace_within_double_curly_brackets, get_token
 from services.api.mobalytics.api_calls_mobalytics import *
 from models.translation_augmentation import augment_data
 from models.propositionizers import propositioner_llama
 from packages.globals import DB_TYPES, DATASETS_PATH
+from models.commons import labelize
 
 
 from transformers.pipelines.text2text_generation import TranslationPipeline
@@ -24,28 +25,37 @@ def create_line(
     pipeline_en_fr : TranslationPipeline, 
     pipeline_fr_en : TranslationPipeline,
 ) -> list[str]:
+    hf_read = get_token("read", "hf")
+    model_name = "meta-llama/Llama-3.2-3B"
+    tokenizer = AutoTokenizer.from_pretrained(model_name, token=hf_read)
+    tokenizer.pad_token = tokenizer.eos_token
     
     assert db_type in DB_TYPES
-    new_text : str = replace_within_double_curly_brackets(text)
-    prop_list : list[str] = propositioner_llama(
-        title, 
-        "", 
-        new_text
-    )
+    new_text : str = labelize(replace_within_double_curly_brackets(text))
+    
     if db_type == "fill-mask" or db_type == "w2v":        
-        for prop in prop_list:
+        tokenized_text = tokenizer.tokenize(new_text)
+        chunk_size = 512
+        overlap = 100
+        chunks = []
+
+        for i in range(0, len(tokenized_text), chunk_size - overlap):
+            chunk = tokenized_text[i:i + chunk_size]
+            chunks.append(tokenizer.convert_tokens_to_string(chunk))
+
+        for chunk in chunks:
             data : dict = {
+                "text": chunk,
                 "label": title,
-                "text": prop
             }
-            # data_bis : dict = {
-            #     "label": title,
-            #     "text": augment_data(prop, pipeline_en_fr, pipeline_fr_en)
-            # }
             buffer.append(data)
-            # buffer.append(data_bis)
 
     elif db_type == "semantic-similarity":
+        prop_list : list[str] = propositioner_llama(
+            title, 
+            "", 
+            new_text
+        )
         for prop in prop_list:
             data : dict = {
                 "label": title,

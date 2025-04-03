@@ -11,7 +11,7 @@ def saveToJson(data_dict : dict, json_path : str):
     with open(json_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-def replace_within_double_curly_brackets(text):
+def replace_within_double_curly_brackets(text : str) -> str:
     if text == None:
         return ""
     # Regular expression to find substrings within double curly braces
