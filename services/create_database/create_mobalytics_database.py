@@ -31,24 +31,14 @@ def create_line(
     tokenizer.pad_token = tokenizer.eos_token
     
     assert db_type in DB_TYPES
-    new_text : str = labelize(replace_within_double_curly_brackets(text))
+    new_text : str = labelize(replace_within_double_curly_brackets(text), title)
     
-    if db_type == "fill-mask" or db_type == "w2v":        
-        tokenized_text = tokenizer.tokenize(new_text)
-        chunk_size = 512
-        overlap = 100
-        chunks = []
-
-        for i in range(0, len(tokenized_text), chunk_size - overlap):
-            chunk = tokenized_text[i:i + chunk_size]
-            chunks.append(tokenizer.convert_tokens_to_string(chunk))
-
-        for chunk in chunks:
-            data : dict = {
-                "text": chunk,
-                "label": title,
-            }
-            buffer.append(data)
+    if db_type == "fill-mask" or db_type == "w2v":               
+        data : dict = {
+            "label": title,
+            "text": new_text,
+        }
+        buffer.append(data)
 
     elif db_type == "semantic-similarity":
         prop_list : list[str] = propositioner_llama(
@@ -74,7 +64,7 @@ def create_mobalytics_database(
 ) -> None:
     assert db_type in DB_TYPES
     transformers.logging.set_verbosity_error()
-    with open(DATASETS_PATH + "champion_mapping.json", "r") as file:
+    with open(DATASETS_PATH + "/champion_mapping.json", "r") as file:
         champion_names : list = json.load(file)
 
         champion_names = [s.lower() for s in champion_names]
@@ -166,7 +156,7 @@ def create_mobalytics_database(
                         pipeline_fr_en
                     )
                 
-                with open(DATASETS_PATH + f"{db_type}/{db_name}.jsonl", "a") as f:
+                with open(DATASETS_PATH + f"/{db_type}/{db_name}.jsonl", "a") as f:
                     label_chunks = {}
                     for line in lines:
                         label = line["label"]
@@ -184,15 +174,15 @@ def create_mobalytics_database(
                             else:
                                 chunk_texts.append(current_chunk.strip())
                                 data : dict = {
-                                    "text": current_chunk.strip(),
                                     "label": label,
+                                    "text": current_chunk.strip(),
                                 }
                                 current_chunk = line["text"]
                                 f.write(json.dumps(data) + "\n")
                         if current_chunk:
                             data : dict = {
-                                "text": current_chunk.strip(),
                                 "label": label,
+                                "text": current_chunk.strip(),
                             }
                             f.write(json.dumps(data) + "\n")
                                 

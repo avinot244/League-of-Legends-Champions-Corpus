@@ -37,7 +37,7 @@ def create_youtube_database():
     )
 
     # Load the dataset
-    ds = load_dataset("avinot/LoL-Champion-Guides-audio", token=hf_read, split="train")
+    ds = load_dataset("avinot/LoL-Champion-Guides-audio", token=hf_read, split="train[244:]")
 
     # Load the tokenizer
     model_name = "meta-llama/Llama-3.2-3B"
@@ -54,22 +54,11 @@ def create_youtube_database():
         prediction = pipe(sample.copy(), batch_size=8)
         transcribed_text = prediction["text"]
         
-        # Tokenize and chunk the transcribed text with 100 tokens overlap
-        tokenized_text = tokenizer(transcribed_text, return_tensors="pt", truncation=False)["input_ids"][0]
-        chunks = []
-        overlap = 100  # Number of tokens to overlap
-        step = 512 - overlap
-        for i in range(0, len(tokenized_text), step):
-            chunks.append(tokenized_text[i:i + 512])
-        
-        # Decode each chunk back to text
-        decoded_chunks = [tokenizer.decode(chunk, skip_special_tokens=True) for chunk in chunks]
         
         # Labelize each chunk
-        labeled_chunks = [labelize(chunk) for chunk in decoded_chunks]
+        labeled_transcription = labelize(transcribed_text, label)
         
         # Save the labeled chunks to a JSONL file
         output_path = DATASETS_PATH + "/youtube/text/all-champs.jsonl"
         with open(output_path, "a") as f:
-            for labeled_chunk in labeled_chunks:
-                f.write(f'{{"id": "{id}", "label": "{label}", "text": "{labeled_chunk}"}}\n')
+            f.write(f'{{"id": "{id}", "label": "{label}", "text": "{labeled_transcription}"}}\n')
