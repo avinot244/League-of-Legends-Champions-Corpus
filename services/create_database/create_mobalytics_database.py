@@ -24,6 +24,7 @@ def create_line(
     buffer : list[str], 
     pipeline_en_fr : TranslationPipeline, 
     pipeline_fr_en : TranslationPipeline,
+    to_labelize : bool = True
 ) -> list[str]:
     hf_read = get_token("read", "hf")
     model_name = "meta-llama/Llama-3.2-3B"
@@ -31,7 +32,10 @@ def create_line(
     tokenizer.pad_token = tokenizer.eos_token
     
     assert db_type in DB_TYPES
-    new_text : str = labelize(replace_within_double_curly_brackets(text), title)
+    if to_labelize:
+        new_text : str = labelize(replace_within_double_curly_brackets(text), title)
+    else:
+        new_text : str = replace_within_double_curly_brackets(text)
     
     if db_type == "fill-mask" or db_type == "w2v":               
         data : dict = {
@@ -74,9 +78,7 @@ def create_mobalytics_database(
         pipeline_fr_en : TranslationPipeline= pipeline("translation", model="Helsinki-NLP/opus-mt-fr-en")
         
         model_name = "chentong00/propositionizer-wiki-flan-t5-large"
-        device = "cuda" if torch.cuda.is_available() else "cpu"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to(device)
         
         for champion_name in tqdm(champion_names):
             snw : dict = get_champion_SnW(champion_name)
@@ -106,6 +108,7 @@ def create_mobalytics_database(
                         lines, 
                         pipeline_en_fr, 
                         pipeline_fr_en,
+                        to_labelize=False
                     )
                 
                 # For champMU data

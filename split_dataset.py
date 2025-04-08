@@ -5,7 +5,7 @@ import json
 #80% : train
 #20% : validation
 
-with open("./data/fill-mask/v4/lol-champs.jsonl", "r") as f:
+with open("./data/fill-mask/v5/lol-champs.jsonl", "r") as f:
     lines = f.readlines()
     random.shuffle(lines)
     split : int = math.floor(0.8 * len(lines))
