@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 class SubClassModel(BaseModel):
     title: str
@@ -15,5 +15,5 @@ class ChampionClassModel(BaseModel):
     
 @dataclass
 class ChampionClassModelWrapper:
-    model: dict = ChampionClassModel.model_json_schema()
+    model: dict = field(default_factory=lambda: ChampionClassModel.model_json_schema())
     prompt: str = "Extract the page title, its general description, and all of the subclasses' titles, strenghts, weaknesses, detailed descriptions and detailed champion lists without any summarization. Ensure all content is captured in full. Replace any links by their corresponding replacement text"

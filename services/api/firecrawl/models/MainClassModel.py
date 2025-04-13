@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 class DescriptionElement(BaseModel):
     title: str
@@ -15,5 +15,5 @@ class MainClassModel(BaseModel):
     
 @dataclass
 class MainClassModelWrapper:
-    model: dict = MainClassModel.model_json_schema()
+    model: dict = field(default_factory=lambda: MainClassModel.model_json_schema())
     prompt: str = "Extract the title of the page, the general description, all detailed definitions, all the detailed interactions, and other attributes with their titles and content. Don't do any summarisation extract all the content. Replace any links by their corresponding replacement text."
