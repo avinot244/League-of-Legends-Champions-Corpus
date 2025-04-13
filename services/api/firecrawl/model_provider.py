@@ -4,7 +4,7 @@ from typing import get_args, Union
 from services.api.firecrawl.models import *
 from services.api.firecrawl.types import *
 
-def model_provider(url : str) -> Union[ChampionModelWrapper, MainRuneModelWrapper, MainTreeRuneModel, SubRuneModelWrapper, MonsterModelWrapper, AtakhanTypeModelWrapper, DragonTypeModelWrapper, JungleCampModelWrapper, MinionTypeModelWrapper, NashorTypeModelWrapper, RiftHeraldTypeModelWrapper, RiftScuttleTypeModelWrapper, SummonerSpellModelWrapper, VoidGrubTypeModelWrapper]:
+def model_provider(url : str) -> Union[ChampionModelWrapper, MainRuneModelWrapper, MainTreeRuneModel, SubRuneModelWrapper, MonsterModelWrapper, AtakhanTypeModelWrapper, DragonTypeModelWrapper, JungleCampModelWrapper, MinionTypeModelWrapper, NashorTypeModelWrapper, RiftHeraldTypeModelWrapper, RiftScuttleTypeModelWrapper, SummonerSpellModelWrapper, VoidGrubTypeModelWrapper, MainClassModelWrapper]:
     data_value : str = url.split("/")[-1]
     
     if data_value in get_args(champions):
@@ -37,6 +37,8 @@ def model_provider(url : str) -> Union[ChampionModelWrapper, MainRuneModelWrappe
         return SummonerSpellModelWrapper()
     if data_value in get_args(item_types):
         return ItemModelWrapper()
+    if data_value == "Champion_classes":
+        return MainClassModelWrapper()
     
     else:
         return Exception(f"Element {data_value} not supported")
