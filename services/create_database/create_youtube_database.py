@@ -17,7 +17,7 @@ def get_mp3_files():
     url_list : list[str] = get_playlist_videos(playlist_id)[:-3]
     
     for url in url_list:
-        download_audio(url, DATASETS_PATH + "/youtube")
+        download_audio(url, DATASETS_PATH + "/youtube/audio")
 
 
 def create_youtube_database():
@@ -37,7 +37,7 @@ def create_youtube_database():
     )
 
     # Load the dataset
-    ds = load_dataset("avinot/LoL-Champion-Guides-audio", token=hf_read, split="train[244:]")
+    ds = load_dataset("avinot/LoL-Champion-Guides-audio", token=hf_read, split="train")
 
     # Load the tokenizer
     model_name = "meta-llama/Llama-3.2-3B"
