@@ -1,10 +1,9 @@
-from pydantic import BaseModel
-from typing import get_args, Union
+from typing import get_args
 
 from services.api.firecrawl.models import *
 from services.api.firecrawl.types import *
 
-def model_provider(url : str) -> Union[ChampionModelWrapper, MainRuneModelWrapper, MainTreeRuneModel, SubRuneModelWrapper, MonsterModelWrapper, AtakhanTypeModelWrapper, DragonTypeModelWrapper, JungleCampModelWrapper, MinionTypeModelWrapper, NashorTypeModelWrapper, RiftHeraldTypeModelWrapper, RiftScuttleTypeModelWrapper, SummonerSpellModelWrapper, VoidGrubTypeModelWrapper, MainClassModelWrapper, ChampionClassModelWrapper, LanesModelWrapper]:
+def model_provider(url : str) -> ModelClass:
     data_value : str = url.split("/")[-1]
     
     if data_value in get_args(champions):
