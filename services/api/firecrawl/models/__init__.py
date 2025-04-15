@@ -18,7 +18,5 @@ from services.api.firecrawl.models.ItempModel import ItemModelWrapper
 from services.api.firecrawl.models.MainClassModel import MainClassModelWrapper
 from services.api.firecrawl.models.ChampionClassModel import ChampionClassModelWrapper
 from services.api.firecrawl.models.LanesModel import LanesModelWrapper
-from services.api.firecrawl.models.SGameplayMechanicsModel import SGameplayMechanicsModelWrapper
-from services.api.firecrawl.models.SChampionRolesModel import SChampionRolesModelWrapper
 
-__all__ = ['ModelClass', 'ChampionModelWrapper', 'MainTreeRuneModel', 'MainRuneModelWrapper', 'SubRuneModelWrapper', 'MonsterModelWrapper', 'AtakhanTypeModelWrapper', 'DragonTypeModelWrapper', 'JungleCampModelWrapper', 'MinionTypeModelWrapper', 'NashorTypeModelWrapper', 'RiftHeraldTypeModelWrapper', 'RiftScuttleTypeModelWrapper', 'SummonerSpellModelWrapper', 'VoidGrubTypeModelWrapper', 'ItemModelWrapper', 'MainClassModelWrapper', 'ChampionClassModelWrapper', 'LanesModelWrapper', 'SGameplayMechanicsModelWrapper', 'SChampionRolesModelWrapper']
+__all__ = ['ModelClass', 'ChampionModelWrapper', 'MainTreeRuneModel', 'MainRuneModelWrapper', 'SubRuneModelWrapper', 'MonsterModelWrapper', 'AtakhanTypeModelWrapper', 'DragonTypeModelWrapper', 'JungleCampModelWrapper', 'MinionTypeModelWrapper', 'NashorTypeModelWrapper', 'RiftHeraldTypeModelWrapper', 'RiftScuttleTypeModelWrapper', 'SummonerSpellModelWrapper', 'VoidGrubTypeModelWrapper', 'ItemModelWrapper', 'MainClassModelWrapper', 'ChampionClassModelWrapper', 'LanesModelWrapper' ]
