@@ -29,7 +29,7 @@ def push_audio_dataset():
                     label = champion.lower()
                     
             if label == "":
-                label = "guide"
+                label = name
             audio_dataset_dict["audio"].append(os.path.join(root, name))
             audio_dataset_dict["label"].append(label)
             audio_dataset_dict["id"].append(str(uuid.uuid4()))

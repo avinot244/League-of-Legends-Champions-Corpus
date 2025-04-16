@@ -11,9 +11,8 @@ from transformers import pipeline
 from tqdm import tqdm
 import torch
 
-def get_mp3_files():
-    # https://youtube.com/playlist?list=PLHdLJeeTQbtIrtOwvmJcO6XkKK5KKp18T&si=lDKE3JfRxGRBVE69
-    playlist_id : str = get_playlist_id("https://youtube.com/playlist?list=PLHdLJeeTQbtIrtOwvmJcO6XkKK5KKp18T&si=lDKE3JfRxGRBVE69")
+def get_mp3_files(playlist_link : str):
+    playlist_id : str = get_playlist_id(playlist_link)
     url_list : list[str] = get_playlist_videos(playlist_id)[:-3]
     
     for url in url_list:
@@ -47,7 +46,7 @@ def create_youtube_database():
     # Get a sample from the dataset
     for line in tqdm(ds, position=0):
         sample = line["audio"]
-        label = line["label"]
+        label : str = line["label"]
         id = line["id"]
 
         # Transcribe the audio sample
@@ -55,8 +54,16 @@ def create_youtube_database():
         transcribed_text = prediction["text"]
         
         
-        # Labelize each chunk
-        labeled_transcription = labelize(transcribed_text, label)
+        # Labelize each chunk if the label is a champion
+        champion_list : list[str] = list()
+        with open("./data/youtube/champion_mapping.json", "r") as f:
+            champion_list = json.load(f)
+            champion_list = [c.lower() for c in champion_list]
+        
+        if label.lower() in champion_list:
+            labeled_transcription = labelize(transcribed_text, label)
+        else:
+            labeled_transcription = transcribed_text
         
         # Save the labeled chunks to a JSONL file
         output_path = DATASETS_PATH + "/youtube/text/all-champs.jsonl"
