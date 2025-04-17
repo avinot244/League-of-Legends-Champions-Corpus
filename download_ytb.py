@@ -7,8 +7,8 @@ playlist_links : list[str] = [
     "https://youtube.com/playlist?list=PLNw7fFNwVdzu2jBEBDtjRtSPUCsSh-MWd&si=Vldpa8VCwRLZBBd8",
 ]
 
-for playlist_link in playlist_links:
-    get_mp3_files(playlist_link)
+# for playlist_link in playlist_links:
+#     get_mp3_files(playlist_link)
 
 
 push_audio_dataset()

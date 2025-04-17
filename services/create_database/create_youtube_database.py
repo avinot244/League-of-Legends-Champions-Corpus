@@ -10,6 +10,7 @@ from datasets import load_dataset
 from transformers import pipeline
 from tqdm import tqdm
 import torch
+import os
 
 def get_mp3_files(playlist_link : str):
     playlist_id : str = get_playlist_id(playlist_link)
@@ -31,7 +32,7 @@ def create_youtube_database():
     pipe = pipeline(
         "automatic-speech-recognition",
         model="openai/whisper-small",
-        chunk_length_s=30,
+        chunk_length_s=15,
         device=device
     )
 
@@ -42,30 +43,46 @@ def create_youtube_database():
     model_name = "meta-llama/Llama-3.2-3B"
     tokenizer = AutoTokenizer.from_pretrained(model_name, token=hf_read)
     tokenizer.pad_token = tokenizer.eos_token
+    output_path = DATASETS_PATH + "/youtube/text/all-champs.jsonl"
+    
+    if os.path.exists(output_path):
+        with open(output_path, "r", encoding="utf-8") as f:
+            data = [json.loads(line) for line in f]
+        id_list = [d["id"] for d in data]
+    else:
+        id_list = []
+    
+    # Labelize each chunk if the label is a champion
+    champion_list : list[str] = list()
+    with open("./data/champion_mapping.json", "r") as f:
+        champion_list = json.load(f)
+        champion_list = [c.lower() for c in champion_list]
     
     # Get a sample from the dataset
     for line in tqdm(ds, position=0):
         sample = line["audio"]
         label : str = line["label"]
         id = line["id"]
+        if not(id in id_list):
+            # Transcribe the audio sample
+            try:
+                with torch.no_grad():
+                    prediction = pipe(sample.copy(), batch_size=1)
+                transcribed_text = prediction["text"]
+            except Exception as e:
+                print(f"[ERROR] Transcription failed for id {id}: {e}")
+                continue  # skip to the next sample
+            
+            if label.lower() in champion_list:
+                labeled_transcription = labelize(transcribed_text, label)
+            else:
+                labeled_transcription = transcribed_text
+            
+            # Save the labeled chunks to a JSONL file
+            with open(output_path, "a") as f:
+                f.write(f'{{"id": "{id}", "label": "{label}", "text": "{labeled_transcription}"}}\n')
+            
+            del prediction
+            del sample
+            torch.cuda.empty_cache()
 
-        # Transcribe the audio sample
-        prediction = pipe(sample.copy(), batch_size=8)
-        transcribed_text = prediction["text"]
-        
-        
-        # Labelize each chunk if the label is a champion
-        champion_list : list[str] = list()
-        with open("./data/youtube/champion_mapping.json", "r") as f:
-            champion_list = json.load(f)
-            champion_list = [c.lower() for c in champion_list]
-        
-        if label.lower() in champion_list:
-            labeled_transcription = labelize(transcribed_text, label)
-        else:
-            labeled_transcription = transcribed_text
-        
-        # Save the labeled chunks to a JSONL file
-        output_path = DATASETS_PATH + "/youtube/text/all-champs.jsonl"
-        with open(output_path, "a") as f:
-            f.write(f'{{"id": "{id}", "label": "{label}", "text": "{labeled_transcription}"}}\n')
