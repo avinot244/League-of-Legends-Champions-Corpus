@@ -64,7 +64,6 @@ def create_youtube_database():
         label : str = line["label"]
         id = line["id"]
         if not(id in id_list):
-            # Transcribe the audio sample
             try:
                 with torch.no_grad():
                     prediction = pipe(sample.copy(), batch_size=1)
