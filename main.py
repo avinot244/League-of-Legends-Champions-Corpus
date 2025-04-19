@@ -13,6 +13,7 @@ if __name__ == "__main__":
     parser.add_argument("--db-type", metavar="[str]", type=str, help="Tells wich type of database you want to create")
     parser.add_argument("--db-name", metavar="[str]", type=str, help="Name of database")
     parser.add_argument("--load-word-embedding", metavar="[uuid]", type=str, help="Load a give w2v model")
+    parser.add_argument("--data-augmentation", action="store_true", default=False, help="Create a new dataset with data augmentation")
     args = parser.parse_args()
     args_data = vars(args)
        
@@ -34,5 +35,7 @@ if __name__ == "__main__":
     elif args_data["push_db_youtube"]:
         push_audio_dataset()
         
+    elif args_data["data_augmentation"]:
+        pass
         
     
