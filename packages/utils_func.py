@@ -27,10 +27,8 @@ def replace_within_double_curly_brackets(text : str) -> str:
 
     return text
 
-def get_token(option : Literal["read", "write"], type : Literal["firecrawl", "hf", "ytb"]):
-    with open(f"./data/tokens/token_{type}.json", "r") as f:
+def get_token(option : Literal["read", "write"], api_type : Literal["firecrawl", "huggingface", "youtube", "anthropic"]):
+    with open(f"./data/tokens/tokens.json", "r") as f:
         res = json.load(f)
-        if option == "read":
-            return res["read"]
-        elif option == "write":
-            return res["write"]
+    
+    return res[api_type][option]

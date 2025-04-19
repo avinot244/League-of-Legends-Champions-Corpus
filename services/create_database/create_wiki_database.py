@@ -1,7 +1,6 @@
 import json
 from tqdm import tqdm
 import time
-import ollama
 import os
 from transformers import AutoTokenizer
 
@@ -10,6 +9,7 @@ from packages.utils_func import get_token
 from packages.types import t_data_type
 from services.prompt_provider.prompt_provider import get_prompt
 from services.api.firecrawl.api_calls_firecrawl import scrape, extract
+from services.chat.anthropic_chat import chat_anthropic
 
 
 
@@ -55,26 +55,15 @@ def create_wiki_database(data_type_list : list[t_data_type], error_mode : bool =
                 data : list[dict] = json.load(f)
                 for json_data in tqdm(data):
                     try:
-                        str_data : str = ollama.chat(
-                            model="json_serializer:latest",
-                            messages=[
-                                {
-                                    "role": "system",
-                                    "content": prompt
-                                },
-                                {
-                                    "role": "user",
-                                    "content": f"<json>\n{json.dumps(json_data, indent=4)}\n</json>"
-                                }
-                            ]
-                        ).message["content"].replace("$", "")
+                        prompt_ = prompt.replace("{{CHAMPION_JSON}}", json.dumps(json_data))
+                        str_data : str = chat_anthropic(prompt_)
                         out_data_list.append({
                             "label": json_data["name"],
                             "text": str_data
                         })
                         with open(f"{DATASETS_PATH}/wiki/wiki_data_str_{data_type}.json", "w") as o:
                             json.dump(out_data_list, o, indent=4)
-                    
+                        time.sleep(0.9)
                     except Exception as e:
                         print(e)
                         print(f"Error serializing {data_type} data: {e}")
@@ -82,7 +71,7 @@ def create_wiki_database(data_type_list : list[t_data_type], error_mode : bool =
                     
     # Splitting it in fixed size of 512 tokens with a 100 tokens overlap
     # Load the tokenizer
-    hf_read = get_token("read", "hf")
+    hf_read = get_token("read", "huggingface")
     model_name = "meta-llama/Llama-3.2-3B"
     tokenizer = AutoTokenizer.from_pretrained(model_name, token=hf_read)
     tokenizer.pad_token = tokenizer.eos_token
