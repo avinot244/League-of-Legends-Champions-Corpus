@@ -2,7 +2,7 @@ import yaml
 import os
 from packages.types import t_data_type
 
-def get_prompt(data_type : t_data_type):
+def get_prompt(data_type : t_data_type) -> str:
     """
     Fetches the appropriate prompt for the given data_type from prompts.yml.
 
