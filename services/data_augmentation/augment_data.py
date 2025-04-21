@@ -108,7 +108,7 @@ def prompt_response_augmentation(output_path : str):
 
 
 def augment_data(output_path : str, error_path : str):
-    augment_data_with_prompt(output_path)
+    augment_data_with_prompt(output_path, error_path)
     prompt_response_augmentation(output_path)
     
     
