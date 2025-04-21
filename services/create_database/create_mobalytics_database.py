@@ -7,14 +7,12 @@ from models.commons import labelize
 
 
 from transformers.pipelines.text2text_generation import TranslationPipeline
-from transformers.models.t5.modeling_t5 import T5ForConditionalGeneration
-from transformers.models.t5.tokenization_t5 import T5Tokenizer
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer
 import transformers
 from transformers import pipeline
 import json
 from tqdm import tqdm
-import torch
+import uuid
 
 
 def create_line(
@@ -26,7 +24,7 @@ def create_line(
     pipeline_fr_en : TranslationPipeline,
     to_labelize : bool = True
 ) -> list[str]:
-    hf_read = get_token("read", "hf")
+    hf_read = get_token("read", "huggingface")
     model_name = "meta-llama/Llama-3.2-3B"
     tokenizer = AutoTokenizer.from_pretrained(model_name, token=hf_read)
     tokenizer.pad_token = tokenizer.eos_token
@@ -39,6 +37,7 @@ def create_line(
     
     if db_type == "fill-mask" or db_type == "w2v":               
         data : dict = {
+            "id": str(uuid.uuid4()),
             "label": title,
             "text": new_text,
         }
@@ -119,6 +118,7 @@ def create_mobalytics_database(
                     lines, 
                     pipeline_en_fr, 
                     pipeline_fr_en,
+                    to_labelize=False
                 )
 
                 # For Strenght and weaknesses
@@ -159,33 +159,36 @@ def create_mobalytics_database(
                         pipeline_fr_en
                     )
                 
-                with open(DATASETS_PATH + f"/{db_type}/{db_name}.jsonl", "a") as f:
-                    label_chunks = {}
-                    for line in lines:
-                        label = line["label"]
-                        if label not in label_chunks:
-                            label_chunks[label] = []
-                        label_chunks[label].append(line)
+                # with open(DATASETS_PATH + f"/{db_type}/{db_name}.jsonl", "a") as f:
+                #     label_chunks = {}
+                #     for line in lines:
+                #         label = line["label"]
+                #         if label not in label_chunks:
+                #             label_chunks[label] = []
+                #         label_chunks[label].append(line)
                     
-                    for label, lines in label_chunks.items():
-                        chunk_texts = []
-                        current_chunk = ""
-                        for line in lines:
-                            tokenized_proposition = tokenizer.tokenize(line["text"])
-                            if len(tokenizer.tokenize(current_chunk)) + len(tokenized_proposition) <= 512:
-                                current_chunk += " " + line["text"]
-                            else:
-                                chunk_texts.append(current_chunk.strip())
-                                data : dict = {
-                                    "label": label,
-                                    "text": current_chunk.strip(),
-                                }
-                                current_chunk = line["text"]
-                                f.write(json.dumps(data) + "\n")
-                        if current_chunk:
-                            data : dict = {
-                                "label": label,
-                                "text": current_chunk.strip(),
-                            }
-                            f.write(json.dumps(data) + "\n")
+                #     for label, lines in label_chunks.items():
+                #         chunk_texts = []
+                #         current_chunk = ""
+                #         for line in lines:
+                #             tokenized_proposition = tokenizer.tokenize(line["text"])
+                #             if len(tokenizer.tokenize(current_chunk)) + len(tokenized_proposition) <= 512:
+                #                 current_chunk += " " + line["text"]
+                #             else:
+                #                 chunk_texts.append(current_chunk.strip())
+                #                 data : dict = {
+                #                     "label": label,
+                #                     "text": current_chunk.strip(),
+                #                 }
+                #                 current_chunk = line["text"]
+                #                 f.write(json.dumps(data) + "\n")
+                #         if current_chunk:
+                #             data : dict = {
+                #                 "label": label,
+                #                 "text": current_chunk.strip(),
+                #             }
+                #             f.write(json.dumps(data) + "\n")
+                with open(DATASETS_PATH + f"/{db_type}/{db_name}.jsonl", "a") as f:
+                    for line in lines:
+                        f.write(json.dumps(line) + "\n")
                                 

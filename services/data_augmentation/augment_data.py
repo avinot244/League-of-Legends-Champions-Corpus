@@ -1,6 +1,8 @@
 import json
 import uuid
 from tqdm import tqdm
+import os
+import time
 
 from services.data_augmentation.champion_role_profile import champion_role_profile, get_list_id
 from services.data_augmentation.paraphrasing import paraphrase_text
@@ -12,10 +14,12 @@ from transformers import AutoTokenizer
 def augment_data_with_prompt(output_path : str):
     augmented_data : list[dict] = []
     id_list_champs : list[str] = get_list_id()
-    print(f"{output_path}augmented_data.jsonl")
+    augmented_id_list : list[str] = list()
+    print("Augmenting data with prompt")
     with open(f"{output_path}lol-champs.jsonl", "r") as f:
         lines = f.readlines()
-        for line in tqdm(lines[:10]):
+        for line in tqdm(lines[:]):
+            time.sleep(0.9)
             data : dict = json.loads(line)
             id : str = data["id"]
             
@@ -31,10 +35,19 @@ def augment_data_with_prompt(output_path : str):
             new_data["label"] = data["label"]
             new_data["text"] = paraphrase_text(data["text"])
             augmented_data.append(new_data)
+            augmented_id_list.append(data["id"])
             
-            with open(f"{output_path}augmented_data.jsonl", "w") as o:
+            if os.path.exists(f"{output_path}augmented_data.jsonl"):
+                open_mode = "a"
+            else:
+                open_mode = "w"
+            
+            with open(f"{output_path}augmented_data.jsonl", open_mode) as o:
                 for d in augmented_data:
                     o.write(json.dumps(d) + "\n")
+                    
+            with open(f"./augmented_ids.json", "w") as o:
+                json.dump(augmented_id_list, o, indent=4)
 
 
 def count_tokens(text: str) -> int:
@@ -44,16 +57,20 @@ def count_tokens(text: str) -> int:
 
 def prompt_response_augmentation(output_path : str):
     augmented_data : list[dict] = []
+    print("Augmenting data with prompt response")
     with open(f"{output_path}lol-champs.jsonl", "r") as f:
         lines = f.readlines()
         chunk : str = ""
-        for line in tqdm(lines[:10]):
+        augmented_id_list : list[str] = list()
+        for line in tqdm(lines[:]):
             data : dict = json.loads(line)
             current_size : int = count_tokens(chunk)
-            if current_size + count_tokens(data["text"]) <= CHUNK_SIZE:
-                chunk += " " + data["text"]
+            if current_size + count_tokens(json.dumps(data)) <= CHUNK_SIZE:
+                chunk += "\n" + json.dumps(data)
+                augmented_id_list.append(data["id"])
             
             else:
+                time.sleep(0.9)
                 qa_pairs : list[dict] = prompt_response(chunk, n=5)
                 if len(qa_pairs) == 0:
                     print("No qa pairs generated")
@@ -64,16 +81,26 @@ def prompt_response_augmentation(output_path : str):
                         new_data["label"] = data["label"]
                         new_data["text"] = qa
                         augmented_data.append(new_data)
-                    
+                        augmented_id_list.append(data["id"])
+
                     chunk = data["text"]
-                    with open(f"{output_path}augmented_data.jsonl", "w") as o:
+                    
+                    if os.path.exists(f"{output_path}augmented_data.jsonl"):
+                        open_mode = "a"
+                    else:
+                        open_mode = "w"
+                        
+                    with open(f"{output_path}augmented_data.jsonl", open_mode) as o:
                         for d in augmented_data:
                             o.write(json.dumps(d) + "\n")
+                            
+                    with open(f"./augmented_ids.json", "w") as o:
+                        json.dump(augmented_id_list, o, indent=4)
             
 
 
 def augment_data(output_path : str):
-    # augment_data_with_prompt(output_path)
+    augment_data_with_prompt(output_path)
     prompt_response_augmentation(output_path)
     
     
