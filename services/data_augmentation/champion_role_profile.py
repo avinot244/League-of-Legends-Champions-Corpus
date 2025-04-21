@@ -2,7 +2,7 @@ from services.prompt_provider.prompt_provider import get_prompt
 from services.chat.anthropic_chat import chat_anthropic
 import json
 
-def champion_role_profile(champion_name: str, ability_description: str) -> str:
+def champion_role_profile(id : str, champion_name: str, ability_description: str, error_path : str) -> str:
     
     """
     Generate a role profile for a given champion based on their abilities.
@@ -16,12 +16,29 @@ def champion_role_profile(champion_name: str, ability_description: str) -> str:
     """
     prompt: str = get_prompt("champion_card")
     
-    prompt_ = prompt.replace("{{CHAMPION_NAME}}", champion_name)
-    prompt_ = prompt_.replace("{{ABILITY_DESCRIPTION}}", ability_description)
-    
-    llm_output = chat_anthropic(prompt_)
-    role_profile = llm_output.split("<champion_card>")[1].split("</champion_card>")[0]
-    
+    prompt = prompt.replace("{{CHAMPION_NAME}}", champion_name)
+    prompt = prompt.replace("{{ABILITY_DESCRIPTIONS}}", ability_description)
+    llm_output = chat_anthropic(prompt)
+    try:
+        role_profile = llm_output.split("<champion_card>")[1].split("</champion_card>")[0]
+    except IndexError:
+        try:
+            with open(error_path, "r") as file:
+                error_data = json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            error_data = {"ids": []}
+
+        # Add the id to the list of ids
+        if "ids" not in error_data:
+            error_data["ids"] = []
+        error_data["ids"].append(id)
+
+        # Save the updated error data back to the JSON file
+        with open(error_path, "w") as file:
+            json.dump(error_data, file, indent=4)
+
+        return None
+        
     return role_profile
 
 def get_list_id() -> list[str]:
