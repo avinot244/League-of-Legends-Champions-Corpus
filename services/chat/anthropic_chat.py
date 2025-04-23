@@ -27,7 +27,7 @@ def chat_anthropic(
         model=model,
         temperature=temperature,
         streaming=streaming,
-        max_tokens=5000,
+        max_tokens=8000,
     )
 
     # Get the response from the model

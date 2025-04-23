@@ -66,7 +66,7 @@ def prompt_response_augmentation(output_path : str):
         lines = f.readlines()
         chunk : str = ""
                 
-        for line in tqdm(lines[:]):
+        for line in tqdm(lines[2669:]):
             data : dict = json.loads(line)
             current_size : int = count_tokens(chunk)
             if current_size + count_tokens(json.dumps(data)) <= CHUNK_SIZE:

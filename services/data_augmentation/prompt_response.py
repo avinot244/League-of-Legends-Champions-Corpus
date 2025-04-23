@@ -24,14 +24,17 @@ def prompt_response(context : str, n : int) -> list[str]:
     
     # Extract the generated responses from the output
     qa_pairs : list[dict] = []
-    print(llm_output)
     
     try:
         data = json.loads(llm_output.split("```json")[1].split("```")[0])
+        for qa_pair in data:
+            qa_pairs.append(qa_pair)
+        
+        return qa_pairs
+    
     except Exception as e:
         print(f"Error parsing JSON: {e}")
+        print(llm_output)
         return []
-    for qa_pair in data:
-        qa_pairs.append(qa_pair)
     
-    return qa_pairs
+    
