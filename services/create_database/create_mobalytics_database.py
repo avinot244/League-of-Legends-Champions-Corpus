@@ -68,9 +68,9 @@ def create_mobalytics_database(
     assert db_type in DB_TYPES
     transformers.logging.set_verbosity_error()
     with open(DATASETS_PATH + "/champion_mapping.json", "r") as file:
-        champion_names : list = json.load(file)
+        champion_names : list[dict] = json.load(file)
 
-        champion_names = [s.lower() for s in champion_names]
+        champion_names = [d["name"].lower() for d in champion_names]
 
         lines : list = []
         pipeline_en_fr : TranslationPipeline= pipeline("translation", model="Helsinki-NLP/opus-mt-en-fr")
@@ -159,35 +159,6 @@ def create_mobalytics_database(
                         pipeline_fr_en
                     )
                 
-                # with open(DATASETS_PATH + f"/{db_type}/{db_name}.jsonl", "a") as f:
-                #     label_chunks = {}
-                #     for line in lines:
-                #         label = line["label"]
-                #         if label not in label_chunks:
-                #             label_chunks[label] = []
-                #         label_chunks[label].append(line)
-                    
-                #     for label, lines in label_chunks.items():
-                #         chunk_texts = []
-                #         current_chunk = ""
-                #         for line in lines:
-                #             tokenized_proposition = tokenizer.tokenize(line["text"])
-                #             if len(tokenizer.tokenize(current_chunk)) + len(tokenized_proposition) <= 512:
-                #                 current_chunk += " " + line["text"]
-                #             else:
-                #                 chunk_texts.append(current_chunk.strip())
-                #                 data : dict = {
-                #                     "label": label,
-                #                     "text": current_chunk.strip(),
-                #                 }
-                #                 current_chunk = line["text"]
-                #                 f.write(json.dumps(data) + "\n")
-                #         if current_chunk:
-                #             data : dict = {
-                #                 "label": label,
-                #                 "text": current_chunk.strip(),
-                #             }
-                #             f.write(json.dumps(data) + "\n")
                 with open(DATASETS_PATH + f"/{db_type}/{db_name}.jsonl", "a") as f:
                     for line in lines:
                         f.write(json.dumps(line) + "\n")

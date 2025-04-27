@@ -56,7 +56,7 @@ def create_youtube_database():
     champion_list : list[str] = list()
     with open("./data/champion_mapping.json", "r") as f:
         champion_list = json.load(f)
-        champion_list = [c.lower() for c in champion_list]
+        champion_list = [d["name"].lower() for d in champion_list]
     
     # Get a sample from the dataset
     for line in tqdm(ds, position=0):
