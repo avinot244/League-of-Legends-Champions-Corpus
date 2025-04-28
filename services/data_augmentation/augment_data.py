@@ -3,10 +3,12 @@ import uuid
 from tqdm import tqdm
 import os
 import time
+from typing import Literal
 
 from services.data_augmentation.champion_role_profile import champion_role_profile, get_list_id
 from services.data_augmentation.paraphrasing import paraphrase_text
 from services.data_augmentation.prompt_response import prompt_response
+from services.data_augmentation.champion_matchup import champion_matchup
 from packages.globals import CHUNK_SIZE, CHUNK_OVERLAP, N_CHUNKS
 from transformers import AutoTokenizer
 
@@ -96,12 +98,67 @@ def prompt_response_augmentation(output_path : str):
                         for d in augmented_data:
                             o.write(json.dumps(d) + "\n")
                                 
+                                
+def get_champion_card(champion : str, output_path : str):
+    with open(f"{output_path}augmented_data-prompt.jsonl", "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            data = json.loads(line)
+            if champion.lower() in data["label"].lower() and data["text"][0] == "#":
+                return data["text"]
+
+def champion_matchup_augmentation(output_path : str, error_path : str):
+    chunk : list = list()
+    chunk_against : list = list()
+    
+    champion_list : list[str] = list()
+    with open("./data/champion_mapping.json", "r") as c:
+        data : list[dict] = json.load(c)
+        champion_list = [d["name"] for d in data] 
+    
+    with open(f"{output_path}mobalytics.jsonl", "r") as f:
+        lines = f.readlines()
+        for champion in tqdm(champion_list[158:]):
+            time.sleep(10)
+            for line in lines:
+                data = json.loads(line)
+                if champion.lower() in data["label"].lower():
+                    if 'against' in data["label"].lower():
+                        chunk_against.append(data["text"])
+                    else:
+                        if data["text"] not in chunk:
+                            chunk.append(data["text"])
             
+            champion_card = get_champion_card(champion, output_path)
+            if champion_card != None:
+                            
+                augmented_data_list : list[dict] = champion_matchup(
+                    champion,
+                    " ".join(chunk),
+                    champion_card,
+                    " ".join(chunk_against),
+                    error_path
+                )
+                
+                augmented_data : list[dict] = [{"id": str(uuid.uuid4()), "label": f"Against {champion}", "text": d["description"]} for d in augmented_data_list]
+                
+                if os.path.exists(f"{output_path}augmented_data_mu.jsonl"):
+                    open_mode = "a"
+                else:
+                    open_mode = "w"
+                
+                with open(f"{output_path}augmented_data_mu.jsonl", open_mode) as o:
+                    for d in augmented_data:
+                        o.write(json.dumps(d) + "\n")
 
 
-def augment_data(output_path : str, error_path : str):
-    # augment_data_with_prompt(output_path, error_path)
-    prompt_response_augmentation(output_path)
+def augment_data(output_path : str, error_path : str, mode : Literal["para/profile", "QA", "mu"]):
+    if mode == "para/profile":
+        augment_data_with_prompt(output_path, error_path)
+    elif mode == "QA":
+        prompt_response_augmentation(output_path, error_path)
+    elif mode == "mu":
+        champion_matchup_augmentation(output_path, error_path)
     
     
     

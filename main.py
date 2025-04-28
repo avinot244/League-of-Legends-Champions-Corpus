@@ -37,6 +37,6 @@ if __name__ == "__main__":
         push_audio_dataset()
         
     elif args_data["data_augmentation"]:
-        augment_data("./data/fill-mask/v6/", "./error_ids.json")
+        augment_data("./data/fill-mask/v6/", "./error_ids_mu.json", "mu")
         
     
