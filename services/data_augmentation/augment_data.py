@@ -105,7 +105,7 @@ def get_champion_card(champion : str, output_path : str):
         lines = f.readlines()
         for line in lines:
             data = json.loads(line)
-            if champion.lower() in data["label"].lower() and data["text"][0] == "#":
+            if champion.lower() == data["label"].lower() and data["text"][0] == "#":
                 return data["text"]
 
 def champion_matchup_augmentation(output_path : str, error_path : str):
@@ -158,23 +158,20 @@ def champion_role_augmentation(output_path : str, error_path : str):
         data : list[dict] = json.load(c)
         champion_list = [d["name"] for d in data]
         
-    with open(f"{output_path}mobalytics.jsonl", "r") as f:
-        lines = f.readlines()
-        for champion in tqdm(champion_list):
-            time.sleep(10)
-            for line in lines:
-                champion_card = get_champion_card(champion, output_path)
-                if champion_card != None:
-                    augmented_data : str = champion_role(champion_card, error_path)
-                    
-                    if os.path.exists(f"{output_path}augmented_data_role.jsonl"):
-                        open_mode = "a"
-                    else:
-                        open_mode = "w"
-                    
-                    with open(f"{output_path}augmented_data_role.jsonl", open_mode) as o:
-                        o.write(json.dumps({"id": str(uuid.uuid4()), "label": champion, "text": augmented_data}) + "\n")
-        
+    for champion in tqdm(champion_list):
+        time.sleep(1)
+        champion_card = get_champion_card(champion, output_path)
+        if champion_card != None:
+            augmented_data : str = champion_role(champion_card, error_path)
+            
+            if os.path.exists(f"{output_path}augmented_data_role.jsonl"):
+                open_mode = "a"
+            else:
+                open_mode = "w"
+            
+            with open(f"{output_path}augmented_data_role.jsonl", open_mode) as o:
+                o.write(json.dumps({"id": str(uuid.uuid4()), "label": champion, "text": augmented_data}) + "\n")
+    
 
 def augment_data(output_path : str, error_path : str, mode : Literal["para/profile", "QA", "mu", "role"]):
     if mode == "para/profile":

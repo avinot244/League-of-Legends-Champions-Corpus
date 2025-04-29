@@ -12,6 +12,7 @@ def champion_role(champion_context : str, error_path : str) -> str:
         llm_output = chat_anthropic(prompt)
         champion_role_description = llm_output.split("```markdown")[1].split("```")[0]
     except Exception as e:
+        print(llm_output)
         try:
             with open(error_path, "r") as file:
                 error_data = json.load(file)
