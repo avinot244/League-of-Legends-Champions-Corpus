@@ -2,6 +2,7 @@ import math
 import random
 import json
 from transformers import AutoTokenizer
+from tqdm import tqdm
 
 #80% : train
 #20% : validation
@@ -10,9 +11,9 @@ from transformers import AutoTokenizer
 tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B", legacy=False)
 
 # File paths
-input_file = "./data/fill-mask/v6/lol-champs.jsonl"
-train_file = "./data/fill-mask/v6/lol-champs-train.jsonl"
-val_file = "./data/fill-mask/v6/lol-champs-validation.jsonl"
+input_file = "./data/fill-mask/v7/lol-corpus.jsonl"
+train_file = "./data/fill-mask/v7/lol-corpus-train.jsonl"
+val_file = "./data/fill-mask/v7/lol-corpus-validation.jsonl"
 
 # Read the input file
 with open(input_file, "r", encoding="utf-8") as f:
@@ -32,7 +33,7 @@ train_tokens = 0
 train_lines = []
 val_lines = []
 
-for line in lines:
+for line in tqdm(lines):
     line_tokens = len(tokenizer.tokenize(json.loads(line)["text"]))
     if train_tokens + line_tokens <= train_token_threshold:
         train_lines.append(line)

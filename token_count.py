@@ -6,8 +6,6 @@ from tqdm import tqdm
 tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
 
 # Load the dataset
-split  = "validation"
-dataset = load_dataset("avinot/LoL-Corpus-v4", split=split)
 
 # Function to count tokens in the dataset
 def count_tokens(dataset, tokenizer):
@@ -19,5 +17,8 @@ def count_tokens(dataset, tokenizer):
     return total_tokens
 
 # Count tokens in the train split
-total_tokens = count_tokens(dataset, tokenizer)
-print(f"Total tokens in the {split} split: {total_tokens}")
+for split in ["train", "validation"]:
+    dataset = load_dataset("avinot/LoL-Corpus-v5", split=split)
+
+    total_tokens = count_tokens(dataset, tokenizer)
+    print(f"Total tokens in the {split} split: {total_tokens}")
