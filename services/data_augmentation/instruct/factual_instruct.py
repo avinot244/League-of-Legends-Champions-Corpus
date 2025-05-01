@@ -10,7 +10,7 @@ def factual_instruct(context : str, nb_pairs : int, error_path : str) -> list[di
     
     try:
         llm_output = chat_anthropic(prompt)
-        qa_pairs = llm_output.split("<outpu>")[1].split("</output>")[0]
+        qa_pairs = llm_output.split("<output>")[1].split("</output>")[0]
         return json.loads(qa_pairs)
     except Exception as e:
         print(e)
