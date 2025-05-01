@@ -1,7 +1,7 @@
 from services.create_database import create_mobalytics_database, create_youtube_database, create_wiki_database
 from services.api.youtube.youtube_data import push_audio_dataset
 from services.utils import regenerate_error_lines
-from services.data_augmentation.augment_data import augment_data
+from services.data_augmentation.augmentation.augment_data import augment_data
 
 import argparse
 

@@ -5,11 +5,11 @@ import os
 import time
 from typing import Literal
 
-from services.data_augmentation.champion_role_profile import champion_role_profile, get_list_id
-from services.data_augmentation.paraphrasing import paraphrase_text
-from services.data_augmentation.prompt_response import prompt_response
-from services.data_augmentation.champion_matchup import champion_matchup
-from services.data_augmentation.champion_role import champion_role
+from services.data_augmentation.augmentation.champion_role_profile import champion_role_profile, get_list_id
+from services.data_augmentation.augmentation.paraphrasing import paraphrase_text
+from services.data_augmentation.augmentation.prompt_response import prompt_response
+from services.data_augmentation.augmentation.champion_matchup import champion_matchup
+from services.data_augmentation.augmentation.champion_role import champion_role
 from packages.globals import CHUNK_SIZE, CHUNK_OVERLAP, N_CHUNKS
 from transformers import AutoTokenizer
 
