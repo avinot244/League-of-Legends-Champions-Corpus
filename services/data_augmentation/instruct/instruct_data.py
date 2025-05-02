@@ -41,6 +41,7 @@ def instruct_factual_generation(input_path : str, output_path : str, error_path 
                 print(count_tokens(chunk))
                 
             else:
+                time.sleep(1)
                 chunk = data["text"]
                 qa_list : list[dict] = factual_instruct(chunk, 5, error_path)
                 
@@ -68,6 +69,7 @@ def instruct_strategic_generation(input_path : str, output_path : str, error_pat
                 if data["label"] in label_list and current_size + count_tokens(data["text"]) < CHUNK_SIZE:
                     chunk.append(data)
                 else:
+                    time.sleep(1)
                     context : str = " ".join([d["text"] for d in chunk])
                     label : str = f"instruct-strategic-{chunk[0]["label"].replace(" ", "-")}"
                     chunk : list[dict] = [data]
@@ -87,7 +89,7 @@ def instruct_role_generation(input_path : str, output_path : str, error_path : s
         lines = i.readlines()
         
         chunk : list[dict] = [json.loads(lines[0])]
-        for line in tqdm(lines[1:8]):
+        for line in tqdm(lines[1:]):
             label_list : list[str] = [d["label"] for d in chunk]
             data : dict = json.loads(line)
             current_size : int = sum([count_tokens(d["text"]) for d in chunk])
@@ -114,7 +116,7 @@ def instruct_role_generation(input_path : str, output_path : str, error_path : s
         data : list[dict] = json.load(c)
         champion_list = [d["name"] for d in data]
     
-    for champion in tqdm(champion_list[:1]):
+    for champion in tqdm(champion_list[:]):
         time.sleep(1)
         champion_card : str = get_champion_card(champion, input_path)
         
