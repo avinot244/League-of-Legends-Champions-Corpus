@@ -5,7 +5,7 @@ import json
 def role_instruct(context : str, nb_pairs : int, error_path : str) -> list[dict]:
     prompt : str = get_prompt("instruct_role")
     prompt = prompt.replace("{{CONTEXT}}", context)
-    prompt = prompt.replace("{{N}}", nb_pairs)
+    prompt = prompt.replace("{{N}}", str(nb_pairs))
     
     try:
         llm_output = chat_anthropic(prompt)

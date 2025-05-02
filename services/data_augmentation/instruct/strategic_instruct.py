@@ -5,12 +5,12 @@ import json
 def strategic_instruct(context : str, nb_pairs : int, error_path : str) -> list[dict]:
     prompt : str = get_prompt("instruct_strategic")
     prompt = prompt.replace("{{CONTEXT}}", context)
-    prompt = prompt.replace("{{N}}", nb_pairs)
+    prompt = prompt.replace("{{N}}", str(nb_pairs))
     
     try:
         llm_output = chat_anthropic(prompt)
         qa_pairs = llm_output.split("<output>")[1].split("</output>")[0]
-        return json.loads(qa_pairs)
+        return json.loads(qa_pairs)["qa_pairs"]
     except Exception as e:
         print(e)
         try:
