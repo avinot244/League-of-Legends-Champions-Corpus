@@ -2,7 +2,7 @@ from services.prompt_provider.prompt_provider import get_prompt
 from services.chat.anthropic_chat import chat_anthropic
 import json
 
-def factual_instruct(context : str, nb_pairs : int, error_path : str) -> list[dict]:
+def factual_instruct(context : str, nb_pairs : int, error_path : str, id : str) -> list[dict]:
     prompt : str = get_prompt("instruct_factual")
     
     prompt = prompt.replace("{{CONTEXT}}", context)
@@ -14,6 +14,7 @@ def factual_instruct(context : str, nb_pairs : int, error_path : str) -> list[di
         return json.loads(qa_pairs)
     except Exception as e:
         print(e)
+        print(llm_output)
         try:
             with open(error_path, "r") as file:
                 error_data = json.load(file)

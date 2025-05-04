@@ -2,7 +2,7 @@ from services.prompt_provider.prompt_provider import get_prompt
 from services.chat.anthropic_chat import chat_anthropic
 import json
 
-def strategic_instruct(context : str, nb_pairs : int, error_path : str) -> list[dict]:
+def strategic_instruct(context : str, nb_pairs : int, error_path : str, id : str) -> list[dict]:
     prompt : str = get_prompt("instruct_strategic")
     prompt = prompt.replace("{{CONTEXT}}", context)
     prompt = prompt.replace("{{N}}", str(nb_pairs))
@@ -13,6 +13,7 @@ def strategic_instruct(context : str, nb_pairs : int, error_path : str) -> list[
         return json.loads(qa_pairs)["qa_pairs"]
     except Exception as e:
         print(e)
+        print(llm_output)
         try:
             with open(error_path, "r") as file:
                 error_data = json.load(file)
