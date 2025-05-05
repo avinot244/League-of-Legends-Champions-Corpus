@@ -35,8 +35,8 @@ def instruct_factual_generation(input_path : str, output_path : str, error_path 
         lines = f.readlines()
         
         chunk : str = ""
-        id : str = json.loads(lines[0])["id"]
-        for line in tqdm(lines):
+        id : str = json.loads(lines[4295])["id"]
+        for line in tqdm(lines[4296:]):
             data = json.loads(line)
             
             if count_tokens(chunk) + count_tokens(data["text"]) < CHUNK_SIZE:
