@@ -22,7 +22,7 @@ with open(input_file, "r", encoding="utf-8") as f:
 random.shuffle(lines)
 
 # Count the total number of tokens in the input file
-total_tokens = sum(len(tokenizer.tokenize(json.loads(line)["completion"])) for line in lines)
+total_tokens = sum(len(tokenizer.tokenize(json.loads(line)["messages"][-1]["content"])) for line in lines)
 
 # Compute the token thresholds for training and validation sets
 train_token_threshold = math.floor(0.8 * total_tokens)
@@ -33,7 +33,7 @@ train_lines = []
 val_lines = []
 
 for line in tqdm(lines):
-    line_tokens = len(tokenizer.tokenize(json.loads(line)["completion"]))
+    line_tokens = len(tokenizer.tokenize(json.loads(line)["messages"][-1]["content"]))
     if train_tokens + line_tokens <= train_token_threshold:
         train_lines.append(line)
         train_tokens += line_tokens
