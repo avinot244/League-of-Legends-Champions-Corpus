@@ -6,7 +6,7 @@ from transformers import AutoTokenizer
 
 from packages.globals import DATASETS_PATH
 from packages.utils_func import get_token
-from packages.types import t_data_type
+from packages.types.data_types import t_data_type
 from services.prompt_provider.prompt_provider import get_prompt
 from services.api.firecrawl.api_calls_firecrawl import scrape, extract
 from services.chat.anthropic_chat import chat_anthropic
