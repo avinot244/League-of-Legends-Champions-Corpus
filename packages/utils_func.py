@@ -32,3 +32,12 @@ def get_token(option : Literal["read", "write"], api_type : Literal["firecrawl",
         res = json.load(f)
     
     return res[api_type][option]
+
+def get_champion_description(champion_name : str) -> str:
+    with open("./data/fill-mask/champion_description.jsonl", "r") as f:
+        lines = f.readlines()
+        
+    for line in lines:
+        data = json.loads(line)
+        if data["label"] == champion_name:
+            return data["text"]
