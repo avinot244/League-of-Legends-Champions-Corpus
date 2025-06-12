@@ -33,8 +33,8 @@ def get_token(option : Literal["read", "write"], api_type : Literal["firecrawl",
     
     return res[api_type][option]
 
-def get_champion_description(champion_name : str) -> str:
-    with open("./data/fill-mask/champion_description.jsonl", "r") as f:
+def get_champion_description(champion_name : str, version : Literal["1", "2"]) -> str:
+    with open(f"./data/fill-mask/champion_description_{version}.jsonl", "r") as f:
         lines = f.readlines()
         
     for line in lines:

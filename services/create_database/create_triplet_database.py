@@ -31,7 +31,7 @@ def update_champion_feature():
             with open("./data/champion_mapping_rich.jsonl", open_mode) as o:
                 o.write(json.dumps(champion_metadata) + "\n")
 
-def get_feature_overlap(champion_metadata_1 : Dict[str, list], champion_metadata_2 : Dict[str, list], feature_list : list[str]) -> int:
+def jaccard_index(champion_metadata_1 : Dict[str, list], champion_metadata_2 : Dict[str, list], feature_list : list[str]) -> int:
     def list_overlap(l1 : list, l2 : list) -> int:
         overlap : int = 0
         for e1 in l1:
@@ -42,7 +42,6 @@ def get_feature_overlap(champion_metadata_1 : Dict[str, list], champion_metadata
         return overlap
     
     overlap_score : int = 0
-       
     for feature in feature_list:
         try:
             if list_overlap(champion_metadata_1[feature], champion_metadata_2[feature]) > 0:
@@ -51,7 +50,9 @@ def get_feature_overlap(champion_metadata_1 : Dict[str, list], champion_metadata
             print(list(champion_metadata_1.keys()))
             print(list(champion_metadata_2.keys()))
             raise e
-    return overlap_score
+    
+    jaccard_score : int = overlap_score/len(feature_list)
+    return jaccard_score
     
 def get_champion_metadata(champion : str, data : list[dict]):
     for d in data:
@@ -60,9 +61,8 @@ def get_champion_metadata(champion : str, data : list[dict]):
 
 def generate_triplets(champion_metadata : list[Dict[str, list[str]]], criterion : int, output_path : str) -> list[Tuple[str, str, str]]:
     champion_list : list[str] = [d["name"] for d in champion_metadata]
-    champion_synergies : Dict[str, list] = {champion:[] for champion in champion_list}
-    feature_list : list[str] = ["damage_profile", "mobility", "team_role", "synergy_profile", "engage_potential", "peel_capability", "objective_control", "roaming_power"]
-    
+    champion_synergies : Dict[str, list[tuple]] = {champion:[] for champion in champion_list}
+    feature_list : list[str] = ["damage_profile", "range", "mobility", "cc_profile", "team_role", "synergy_profile", "power_curve", "engage_potential", "peel_capability", "wave_clear", "objective_control", "zone_control", "roaming_power", "duel_power"]
     print("Creating the synergy matrix")
     for anchor in tqdm(champion_list):
         for potential_positive in champion_list:
@@ -70,35 +70,34 @@ def generate_triplets(champion_metadata : list[Dict[str, list[str]]], criterion 
                 a_data = get_champion_metadata(anchor, champion_metadata)
                 p_data = get_champion_metadata(potential_positive, champion_metadata)
                 
-                if get_feature_overlap(a_data, p_data, feature_list) >= criterion:
-                    champion_synergies[anchor].append(potential_positive)
+                jaccard_score : int = jaccard_index(a_data, p_data, feature_list)
+                
+                if jaccard_score >= criterion:
+                    champion_synergies[anchor].append((potential_positive, jaccard_score))
     
     with open("./temp.json", "w") as f:
         json.dump(champion_synergies, f, indent=4)
     
     print("Building the triplets")
+    visited = []
+    first = True
     for anchor in tqdm(champion_list):
-        visited = []
         positive_list : list[str] = champion_synergies[anchor]
         for positive in positive_list:
-            negative : str = ""
-            if len(visited) == 170 - len(positive_list):
-                visited = []
-
-            # Build the potential negative_list and add (anchor, positive, negative_i) for negative_i in negative_list
-            for potential_negative in champion_list:
-                if not(potential_negative in positive_list) and not(potential_negative in visited) and negative != positive and negative != anchor:
-                    negative = potential_negative
-                    visited.append(negative)
-                    break
-            
-            if not(os.path.exists(output_path)):
-                open_mode : str = "w"
-            else:
-                open_mode : str = "a"
-            
-            with open(output_path, open_mode) as o:
-                o.write(json.dumps({"anchor": anchor, "positive": positive, "negative": negative}) + "\n") 
+            if not((anchor, positive[0]) in visited or (positive[0], anchor) in visited):
+                if not(os.path.exists(output_path)) or first:
+                    open_mode : str = "w"
+                    first = False
+                else:
+                    open_mode : str = "a"
+                
+                with open(output_path, open_mode) as o:
+                    o.write(json.dumps({"anchor": anchor, "positive": positive[0]}) + "\n")
+                
+                visited.append((anchor, positive[0]))
+                visited.append((positive[0], anchor))
+                
+    return champion_synergies
                 
 
 def generate_triplet_dataset():
@@ -111,5 +110,5 @@ def generate_triplet_dataset():
     if len(data) < 170:
         update_champion_feature()
     
-    generate_triplets(data, 8, "./data/contrastive/champion_triplets.jsonl")
+    generate_triplets(data, 0.4, "./data/contrastive/champion_triplets.jsonl")
     
