@@ -10,7 +10,7 @@ def chat_anthropic(
     pre_filled_response : str = None
 ):
     client = anthropic.Anthropic(
-        api_key=get_token("read", "anthropic")
+        api_key=get_token("read", "anthropic2")
     )
     
     if pre_filled_response:
@@ -32,7 +32,7 @@ def chat_anthropic(
  
     else:
         llm = ChatAnthropic(
-            api_key=get_token("read", "anthropic"),
+            api_key=get_token("read", "anthropic2"),
             model=model,
             temperature=temperature,
             streaming=streaming,

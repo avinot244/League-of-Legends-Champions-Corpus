@@ -27,7 +27,7 @@ def replace_within_double_curly_brackets(text : str) -> str:
 
     return text
 
-def get_token(option : Literal["read", "write"], api_type : Literal["firecrawl", "huggingface", "youtube", "anthropic"]):
+def get_token(option : Literal["read", "write"], api_type : Literal["firecrawl", "huggingface", "youtube", "anthropic", "anthorpic2"]):
     with open(f"./data/tokens/tokens.json", "r") as f:
         res = json.load(f)
     
@@ -41,3 +41,5 @@ def get_champion_description(champion_name : str, version : Literal["1", "2"]) -
         data = json.loads(line)
         if data["label"] == champion_name:
             return data["text"]
+        
+    print(f"Champion {champion_name} not found in champion_description_{version}.jsonl")

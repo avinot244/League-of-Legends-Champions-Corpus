@@ -21,18 +21,18 @@ def champion_triplets(
     
     
     try:
-        llm_output : str = chat_anthropic(prompt)
-        json_output = llm_output.split("<triplet_output>")[1].strip().split("</triplet_output>")[0]
-        triplets = json.loads(json_output)
-        return triplets
+        llm_output : str = chat_anthropic(prompt, model="claude-3-5-sonnet-20241022")
     except OverloadedError as o:
         print(f"{index} : Overload of AnthropicAPI")
-        time.sleep(60)
+        time.sleep(300)
         
         
-    
+    try:
+        json_output = llm_output.split("```json")[1].strip().split("```")[0]
+        triplets = json.loads(json_output)
+        return triplets
     except Exception as e:
         print(f"{index} : Error generating champion triplets: {e} ")
 
-    
-    
+#392
+#574
