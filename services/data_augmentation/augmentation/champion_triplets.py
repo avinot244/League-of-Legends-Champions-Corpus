@@ -1,7 +1,9 @@
 from services.prompt_provider.prompt_provider import get_prompt
 from services.chat.anthropic_chat import chat_anthropic
+from services.chat.openai_chat import chat_openai
 
 from anthropic._exceptions import OverloadedError
+from typing import Literal
 import time
 
 import json
@@ -12,6 +14,7 @@ def champion_triplets(
     negative_description: str,
     index: int,
     nb_triplets : int = 5,
+    llm_provider : Literal["anthropic", "openai"] = "anthropic"
 ) -> list[dict]:
     prompt = get_prompt("champion_triplets")
     prompt = prompt.replace("{{ANCHOR_DESCRIPTION}}", anchor_description)
@@ -21,7 +24,11 @@ def champion_triplets(
     
     
     try:
-        llm_output : str = chat_anthropic(prompt, model="claude-3-5-sonnet-20241022")
+        if llm_provider == "anthropic":
+            llm_output : str = chat_anthropic(prompt, model="claude-3-5-sonnet-20241022")
+        elif llm_provider == "openai":
+            llm_output : str = chat_openai(prompt, model="gpt-4o-mini")
+    
     except OverloadedError as o:
         print(f"{index} : Overload of AnthropicAPI")
         time.sleep(300)
