@@ -10,7 +10,7 @@ def chat_anthropic(
     pre_filled_response : str = None
 ):
     client = anthropic.Anthropic(
-        api_key=get_token("read", "anthropic2")
+        api_key=get_token("read", "anthropic")
     )
     
     if pre_filled_response:

@@ -1,8 +1,8 @@
 import random
 
-input_path = "./data/contrastive/v2/champion_triplets_rationales.jsonl"
-train_path = "./data/contrastive/v2/champion_triplets_rationales_train.jsonl"
-val_path = "./data/contrastive/v2/champion_triplets_rationales_val.jsonl"
+input_path = "./data/contrastive/v5/champion_triplets_rationales.jsonl"
+train_path = "./data/contrastive/v5/champion_triplets_rationales_train.jsonl"
+val_path = "./data/contrastive/v5/champion_triplets_rationales_val.jsonl"
 split_ratio = 0.8  # 80% train, 20% val
 
 # Read all lines
